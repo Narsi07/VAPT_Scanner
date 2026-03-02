@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE nmaprun>
+<?xml-stylesheet href="file:///C:/Program Files (x86)/Nmap/nmap.xsl" type="text/xsl"?>
+<!-- Nmap 7.98 scan initiated Mon Mar  2 11:09:11 2026 as: nmap -v -sV -Pn -p 1-65535 -oX output.xml 192.168.1.1 -->
+<nmaprun scanner="nmap" args="nmap -v -sV -Pn -p 1-65535 -oX output.xml 192.168.1.1" start="1772429951" startstr="Mon Mar  2 11:09:11 2026" version="7.98" xmloutputversion="1.05">
+<scaninfo type="syn" protocol="tcp" numservices="65535" services="1-65535"/>
+<verbose level="1"/>
+<debugging level="0"/>
+<taskbegin task="Parallel DNS resolution of 1 host." time="1772429951"/>
+<taskend task="Parallel DNS resolution of 1 host." time="1772429951"/>
+<taskbegin task="SYN Stealth Scan" time="1772429951"/>
+<taskprogress task="SYN Stealth Scan" time="1772429992" percent="0.30"/>
+<taskprogress task="SYN Stealth Scan" time="1772430022" percent="0.53"/>
+<taskprogress task="SYN Stealth Scan" time="1772430052" percent="0.76"/>
+<taskprogress task="SYN Stealth Scan" time="1772430082" percent="0.98"/>
+<taskprogress task="SYN Stealth Scan" time="1772430112" percent="1.21" remaining="13187" etc="1772443298"/>
+<taskprogress task="SYN Stealth Scan" time="1772430715" percent="5.75" remaining="12516" etc="1772443230"/>
+<taskprogress task="SYN Stealth Scan" time="1772431369" percent="10.69" remaining="11850" etc="1772443219"/>
+<taskprogress task="SYN Stealth Scan" time="1772432023" percent="15.63" remaining="11187" etc="1772443209"/>
