@@ -1,0 +1,274 @@
+/* ============================================================
+   VAPT Security Platform — Modern Login CSS
+   Dark cybersecurity theme
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap');
+
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+:root {
+    --bg-dark:       #0a0e1a;
+    --bg-card:       #111827;
+    --bg-input:      #1c2333;
+    --border:        #2d3748;
+    --accent:        #00d4ff;
+    --accent-dim:    rgba(0, 212, 255, 0.15);
+    --accent-glow:   0 0 20px rgba(0, 212, 255, 0.35);
+    --danger:        #ef4444;
+    --success:       #22c55e;
+    --text-primary:  #f1f5f9;
+    --text-muted:    #64748b;
+    --radius:        12px;
+    --transition:    0.25s ease;
+}
+
+html, body {
+    height: 100%;
+    background: var(--bg-dark);
+    font-family: 'Inter', sans-serif;
+    color: var(--text-primary);
+    overflow: hidden;
+}
+
+/* Animated grid background */
+body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+        linear-gradient(rgba(0, 212, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 212, 255, 0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* Glowing blobs */
+body::after {
+    content: '';
+    position: fixed;
+    top: -20%;
+    right: -10%;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(0, 212, 255, 0.08) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+.login-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 20px;
+    position: relative;
+    z-index: 1;
+}
+
+.login-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 48px 40px;
+    width: 100%;
+    max-width: 420px;
+    box-shadow:
+        0 0 0 1px rgba(0, 212, 255, 0.05),
+        0 25px 50px rgba(0, 0, 0, 0.6),
+        0 0 80px rgba(0, 212, 255, 0.04);
+    position: relative;
+    overflow: hidden;
+}
+
+.login-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+}
+
+/* Logo / Brand */
+.brand-section {
+    text-align: center;
+    margin-bottom: 36px;
+}
+
+.brand-logo {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 60px;
+    height: 60px;
+    background: var(--accent-dim);
+    border: 1px solid rgba(0, 212, 255, 0.3);
+    border-radius: 16px;
+    margin-bottom: 16px;
+    box-shadow: var(--accent-glow);
+}
+
+.brand-logo svg {
+    width: 30px;
+    height: 30px;
+    fill: var(--accent);
+}
+
+.brand-title {
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--text-primary);
+    letter-spacing: 4px;
+    font-family: 'JetBrains Mono', monospace;
+}
+
+.brand-title span {
+    color: var(--accent);
+}
+
+.brand-subtitle {
+    font-size: 12px;
+    color: var(--text-muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-top: 6px;
+}
+
+/* Form elements */
+.form-group {
+    margin-bottom: 18px;
+}
+
+.form-label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+}
+
+.input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-icon {
+    position: absolute;
+    left: 14px;
+    color: var(--text-muted);
+    font-size: 15px;
+    pointer-events: none;
+    transition: color var(--transition);
+}
+
+.form-control {
+    width: 100%;
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text-primary);
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    padding: 13px 16px 13px 42px;
+    outline: none;
+    transition: all var(--transition);
+}
+
+.form-control::placeholder { color: var(--text-muted); }
+
+.form-control:focus {
+    border-color: var(--accent);
+    background: var(--bg-input);
+    box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.1);
+}
+
+.form-control:focus + .input-icon,
+.input-wrapper:focus-within .input-icon {
+    color: var(--accent);
+}
+
+/* Reorder — put icon after input in DOM but display before */
+.input-wrapper .form-control { order: 2; }
+.input-wrapper .input-icon   { order: 1; position: absolute; }
+
+/* Alert messages */
+.alert {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: var(--radius);
+    color: #fca5a5;
+    font-size: 13px;
+    padding: 10px 14px;
+    margin-bottom: 18px;
+}
+
+/* Submit button */
+.btn-signin {
+    width: 100%;
+    background: linear-gradient(135deg, var(--accent), #0099bb);
+    border: none;
+    border-radius: var(--radius);
+    color: #0a0e1a;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    padding: 14px;
+    cursor: pointer;
+    margin-top: 8px;
+    transition: all var(--transition);
+    text-transform: uppercase;
+    box-shadow: 0 4px 15px rgba(0, 212, 255, 0.3);
+}
+
+.btn-signin:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 25px rgba(0, 212, 255, 0.5);
+    background: linear-gradient(135deg, #33ddff, var(--accent));
+}
+
+.btn-signin:active { transform: translateY(0); }
+
+/* Footer */
+.login-footer {
+    text-align: center;
+    margin-top: 28px;
+    font-size: 11px;
+    color: var(--text-muted);
+    letter-spacing: 0.5px;
+}
+
+/* Scanning animation dots */
+.scan-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin-bottom: 24px;
+}
+
+.scan-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    animation: pulse-dot 1.4s ease-in-out infinite;
+}
+
+.scan-dot:nth-child(2) { animation-delay: 0.2s; opacity: 0.7; }
+.scan-dot:nth-child(3) { animation-delay: 0.4s; opacity: 0.4; }
+
+@keyframes pulse-dot {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.5); opacity: 0.5; }
+}
