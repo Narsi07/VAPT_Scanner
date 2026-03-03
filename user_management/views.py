@@ -1,18 +1,5 @@
 # -*- coding: utf-8 -*-
-#                    _
-#     /\            | |
-#    /  \   _ __ ___| |__   ___ _ __ _   _
-#   / /\ \ | '__/ __| '_ \ / _ \ '__| | | |
-#  / ____ \| | | (__| | | |  __/ |  | |_| |
-# /_/    \_\_|  \___|_| |_|\___|_|   \__, |
-#                                     __/ |
-#                                    |___/
-# Copyright (C) 2017 Anand Tiwari
-#
-# Email:   anandtiwarics@gmail.com
-# Twitter: @anandtiwarics
-#
-# This file is part of ArcherySec Project.
+# VAPT Security Platform
 
 
 from datetime import datetime, timedelta
@@ -169,7 +156,7 @@ class InviteUserAPIView(APIView):
         uid = urlsafe_base64_encode(force_bytes(user.uu_id))
         token = user.pass_token
         return request.build_absolute_uri(
-            reverse("archeryapi:activate-user", kwargs={"uid": uid, "token": token})
+            reverse("vaptapi:activate-user", kwargs={"uid": uid, "token": token})
         )
 
 
@@ -209,7 +196,7 @@ class ResetUserPasswordAPIView(APIView):
         uid = urlsafe_base64_encode(force_bytes(user.uu_id))
         token = user.pass_token
         return request.build_absolute_uri(
-            reverse("archeryapi:reset-password", kwargs={"uid": uid, "token": token})
+            reverse("vaptapi:reset-password", kwargs={"uid": uid, "token": token})
         )
 
 

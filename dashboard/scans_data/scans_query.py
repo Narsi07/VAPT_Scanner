@@ -1,21 +1,8 @@
 # -*- coding: utf-8 -*-
-#                    _
-#     /\            | |
-#    /  \   _ __ ___| |__   ___ _ __ _   _
-#   / /\ \ | '__/ __| '_ \ / _ \ '__| | | |
-#  / ____ \| | | (__| | | |  __/ |  | |_| |
-# /_/    \_\_|  \___|_| |_|\___|_|   \__, |
-#                                     __/ |
-#                                    |___/
-# Copyright (C) 2017 Anand Tiwari
-#
-# Email:   anandtiwarics@gmail.com
-# Twitter: @anandtiwarics
-#
-# This file is part of ArcherySec Project.
+# VAPT Security Platform
 
 
-""" Author: Anand Tiwari """
+
 
 from __future__ import unicode_literals
 
@@ -23,9 +10,24 @@ from itertools import chain
 
 from django.db.models import Sum
 
-from cloudscanners.models import CloudScansDb, CloudScansResultsDb
-from compliance.models import (DockleScanDb, DockleScanResultsDb, InspecScanDb,
-                               InspecScanResultsDb)
+try:
+    from cloudscanners.models import CloudScansDb, CloudScansResultsDb
+    CLOUD_AVAILABLE = True
+except ImportError:
+    CloudScansDb = None
+    CloudScansResultsDb = None
+    CLOUD_AVAILABLE = False
+try:
+    from compliance.models import (DockleScanDb, DockleScanResultsDb, InspecScanDb,
+                                   InspecScanResultsDb)
+    COMPLIANCE_AVAILABLE = True
+except ImportError:
+    DockleScanDb = None
+    DockleScanResultsDb = None
+    InspecScanDb = None
+    InspecScanResultsDb = None
+    COMPLIANCE_AVAILABLE = False
+
 from networkscanners.models import NetworkScanDb, NetworkScanResultsDb
 from pentest.models import PentestScanDb, PentestScanResultsDb
 from staticscanners.models import StaticScanResultsDb, StaticScansDb

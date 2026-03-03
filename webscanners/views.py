@@ -1,18 +1,5 @@
 # -*- coding: utf-8 -*-
-#                    _
-#     /\            | |
-#    /  \   _ __ ___| |__   ___ _ __ _   _
-#   / /\ \ | '__/ __| '_ \ / _ \ '__| | | |
-#  / ____ \| | | (__| | | |  __/ |  | |_| |
-# /_/    \_\_|  \___|_| |_|\___|_|   \__, |
-#                                     __/ |
-#                                    |___/
-# Copyright (C) 2017 Anand Tiwari
-#
-# Email:   anandtiwarics@gmail.com
-# Twitter: @anandtiwarics
-#
-# This file is part of ArcherySec Project.
+# VAPT Security Platform
 
 from __future__ import unicode_literals
 
@@ -23,7 +10,10 @@ from django.core import signing
 from django.http import HttpResponseRedirect
 from django.shortcuts import HttpResponse, render
 from django.urls import reverse
-from jira import JIRA
+try:
+    from jira import JIRA
+except ImportError:
+    JIRA = None
 from notifications.models import Notification
 from notifications.signals import notify
 from rest_framework import status
@@ -32,7 +22,10 @@ from rest_framework.renderers import TemplateHTMLRenderer
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from jiraticketing.models import jirasetting
+try:
+    from jiraticketing.models import jirasetting
+except Exception:
+    jirasetting = None
 from user_management import permissions
 from webscanners.models import WebScanResultsDb, WebScansDb
 from webscanners.serializers import (WebScanResultsDbSerializer,

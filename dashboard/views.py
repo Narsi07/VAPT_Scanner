@@ -1,21 +1,8 @@
 # -*- coding: utf-8 -*-
-#                    _
-#     /\            | |
-#    /  \   _ __ ___| |__   ___ _ __ _   _
-#   / /\ \ | '__/ __| '_ \ / _ \ '__| | | |
-#  / ____ \| | | (__| | | |  __/ |  | |_| |
-# /_/    \_\_|  \___|_| |_|\___|_|   \__, |
-#                                     __/ |
-#                                    |___/
-# Copyright (C) 2017 Anand Tiwari
-#
-# Email:   anandtiwarics@gmail.com
-# Twitter: @anandtiwarics
-#
-# This file is part of ArcherySec Project.
+# VAPT Security Platform
 
 
-""" Author: Anand Tiwari """
+
 
 from __future__ import unicode_literals
 
@@ -30,8 +17,21 @@ from django.urls import reverse
 from notifications.models import Notification
 from rest_framework.permissions import AllowAny, IsAuthenticated
 
-from cloudscanners.models import CloudScansDb, CloudScansResultsDb
-from compliance.models import DockleScanDb, InspecScanDb
+try:
+    from cloudscanners.models import CloudScansDb, CloudScansResultsDb
+    CLOUD_AVAILABLE = True
+except ImportError:
+    CloudScansDb = None
+    CloudScansResultsDb = None
+    CLOUD_AVAILABLE = False
+
+try:
+    from compliance.models import DockleScanDb, InspecScanDb
+    COMPLIANCE_AVAILABLE = True
+except ImportError:
+    DockleScanDb = None
+    InspecScanDb = None
+    COMPLIANCE_AVAILABLE = False
 from dashboard.scans_data import scans_query
 from networkscanners.models import NetworkScanDb, NetworkScanResultsDb
 from pentest.models import PentestScanDb, PentestScanResultsDb

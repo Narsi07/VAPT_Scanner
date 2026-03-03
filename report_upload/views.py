@@ -1,18 +1,5 @@
 # -*- coding: utf-8 -*-
-#                    _
-#     /\            | |
-#    /  \   _ __ ___| |__   ___ _ __ _   _
-#   / /\ \ | '__/ __| '_ \ / _ \ '__| | | |
-#  / ____ \| | | (__| | | |  __/ |  | |_| |
-# /_/    \_\_|  \___|_| |_|\___|_|   \__, |
-#                                     __/ |
-#                                    |___/
-# Copyright (C) 2017 Anand Tiwari
-#
-# Email:   anandtiwarics@gmail.com
-# Twitter: @anandtiwarics
-#
-# This file is part of ArcherySec Project.
+# VAPT Security Platform
 
 import csv
 import io
@@ -31,8 +18,20 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.renderers import TemplateHTMLRenderer
 from rest_framework.views import APIView
 
-from cloudscanners.models import CloudScansDb
-from compliance.models import DockleScanDb, InspecScanDb
+try:
+    from cloudscanners.models import CloudScansDb
+    CLOUD_AVAILABLE = True
+except ImportError:
+    CloudScansDb = None
+    CloudScansResultsDb = None
+    CLOUD_AVAILABLE = False
+try:
+    from compliance.models import DockleScanDb, InspecScanDb
+    COMPLIANCE_AVAILABLE = True
+except ImportError:
+    DockleScanDb = None
+    InspecScanDb = None
+    COMPLIANCE_AVAILABLE = False
 from networkscanners.models import NetworkScanDb
 from projects.models import ProjectDb
 from scanners.scanner_parser import scanner_parser

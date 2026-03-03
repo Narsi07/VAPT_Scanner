@@ -65,7 +65,7 @@
                                     <td>{{ data.created_time }}</td>
                                     <td class="confirm-delete">
                                         <div>
-                                            <form action="{% url 'archerysettings:del_setting' %}" method="POST"
+                                            <form action="{% url 'vaptsettings:del_setting' %}" method="POST"
                                                 class="form-horizontal">
                                                 {% csrf_token %}
                                                 <input type="hidden" name="setting_id" value="{{ data.setting_id }}">
@@ -75,7 +75,7 @@
                                         </div>
                                     </td>
                                     <td>
-                                        <form method="POST" action="{% url 'archerysettings:settings' %}">{% csrf_token
+                                        <form method="POST" action="{% url 'vaptsettings:settings' %}">{% csrf_token
                                             %}
                                             <input type="hidden" name="setting_id" value="{{ data.setting_id }}">
                                             <input type="hidden" name="setting_of" value="zap">
@@ -106,7 +106,7 @@
                                     <td>{{ data.created_time }}</td>
                                     <td class="confirm-delete">
                                         <div>
-                                            <form action="{% url 'archerysettings:del_setting' %}" method="POST"
+                                            <form action="{% url 'vaptsettings:del_setting' %}" method="POST"
                                                 class="form-horizontal">
                                                 {% csrf_token %}
                                                 <input type="hidden" name="setting_id" value="{{ data.setting_id }}">
@@ -116,7 +116,7 @@
                                         </div>
                                     </td>
                                     <td>
-                                        <form method="POST" action="{% url 'archerysettings:settings' %}">{% csrf_token
+                                        <form method="POST" action="{% url 'vaptsettings:settings' %}">{% csrf_token
                                             %}
                                             <input type="hidden" name="setting_id" value="{{ data.setting_id }}">
                                             <input type="hidden" name="setting_of" value="openvas">
@@ -146,7 +146,7 @@
                                     <td>{{ data.created_time }}</td>
                                     <td class="confirm-delete">
                                         <div>
-                                            <form action="{% url 'archerysettings:del_setting' %}" method="POST"
+                                            <form action="{% url 'vaptsettings:del_setting' %}" method="POST"
                                                 class="form-horizontal">
                                                 {% csrf_token %}
                                                 <input type="hidden" name="setting_id" value="{{ data.setting_id }}">
@@ -156,7 +156,7 @@
                                         </div>
                                     </td>
                                     <td>
-                                        <form method="POST" action="{% url 'archerysettings:settings' %}">{% csrf_token
+                                        <form method="POST" action="{% url 'vaptsettings:settings' %}">{% csrf_token
                                             %}
                                             <input type="hidden" name="setting_id" value="{{ data.setting_id }}">
                                             <input type="hidden" name="setting_of" value="jira">
@@ -185,7 +185,7 @@
                                     <td>{{ data.created_time }}</td>
                                     <td class="confirm-delete">
                                         <div>
-                                            <form action="{% url 'archerysettings:del_setting' %}" method="POST"
+                                            <form action="{% url 'vaptsettings:del_setting' %}" method="POST"
                                                 class="form-horizontal">
                                                 {% csrf_token %}
                                                 <input type="hidden" name="setting_id" value="{{ data.setting_id }}">
@@ -195,7 +195,7 @@
                                         </div>
                                     </td>
                                     <td>
-                                        <form method="POST" action="{% url 'archerysettings:settings' %}">{% csrf_token
+                                        <form method="POST" action="{% url 'vaptsettings:settings' %}">{% csrf_token
                                             %}
                                             <input type="hidden" name="setting_id" value="{{ data.setting_id }}">
                                             <input type="hidden" name="setting_of" value="arachni">
@@ -211,7 +211,7 @@
                                         <div class="p-1"><img src="/static/tools/email.png" alt="user" width="50"
                                                 class="rounded-circle" data-toggle="tooltip" data-placement="top"
                                                 title="Email">
-                                            <b><a href="{% url 'archerysettings:email_setting' %}">Email</a></b>
+                                            <b><a href="{% url 'vaptsettings:email_setting' %}">Email</a></b>
                                         </div>
                                     </td>
                                     <td>
@@ -224,7 +224,7 @@
                                     <td>{{ data.created_time }}</td>
                                     <td class="confirm-delete">
                                         <div>
-                                            <form action="{% url 'archerysettings:del_setting' %}" method="POST"
+                                            <form action="{% url 'vaptsettings:del_setting' %}" method="POST"
                                                 class="form-horizontal">
                                                 {% csrf_token %}
                                                 <input type="hidden" name="setting_id" value="{{ data.setting_id }}">
@@ -234,7 +234,7 @@
                                         </div>
                                     </td>
                                     <td>
-                                        <form method="POST" action="{% url 'archerysettings:settings' %}">{% csrf_token
+                                        <form method="POST" action="{% url 'vaptsettings:settings' %}">{% csrf_token
                                             %}
                                             <input type="hidden" name="setting_id" value="{{ data.setting_id }}">
                                             <input type="hidden" name="setting_of" value="email">

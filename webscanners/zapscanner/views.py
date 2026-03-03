@@ -1,18 +1,5 @@
 # -*- coding: utf-8 -*-
-#                    _
-#     /\            | |
-#    /  \   _ __ ___| |__   ___ _ __ _   _
-#   / /\ \ | '__/ __| '_ \ / _ \ '__| | | |
-#  / ____ \| | | (__| | | |  __/ |  | |_| |
-# /_/    \_\_|  \___|_| |_|\___|_|   \__, |
-#                                     __/ |
-#                                    |___/
-# Copyright (C) 2017 Anand Tiwari
-#
-# Email:   anandtiwarics@gmail.com
-# Twitter: @anandtiwarics
-#
-# This file is part of ArcherySec Project.
+# VAPT Security Platform
 
 from __future__ import unicode_literals
 
@@ -36,9 +23,9 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from selenium import webdriver
 
-from archerysettings.models import EmailDb, SettingsDb, ZapSettingsDb
+from vaptsettings.models import EmailDb, SettingsDb, ZapSettingsDb
 from projects.models import ProjectDb
-from scanners.scanner_plugin.web_scanner import burp_plugin, zap_plugin
+from scanners.scanner_plugin.web_scanner import zap_plugin
 from user_management import permissions
 from webscanners.models import WebScansDb, cookie_db, excluded_db
 from webscanners.zapscanner.serializers import (ZapScansSerializer,
@@ -529,4 +516,4 @@ class ZapSettingUpdate(APIView):
                 if request.path[:4] == "/api":
                     return Response({"message": "Not updated, Something Wrong !!!"})
 
-        return HttpResponseRedirect(reverse("archerysettings:settings"))
+        return HttpResponseRedirect(reverse("vaptsettings:settings"))

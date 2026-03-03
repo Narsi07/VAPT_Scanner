@@ -1,18 +1,5 @@
 # -*- coding: utf-8 -*-
-#                    _
-#     /\            | |
-#    /  \   _ __ ___| |__   ___ _ __ _   _
-#   / /\ \ | '__/ __| '_ \ / _ \ '__| | | |
-#  / ____ \| | | (__| | | |  __/ |  | |_| |
-# /_/    \_\_|  \___|_| |_|\___|_|   \__, |
-#                                     __/ |
-#                                    |___/
-# Copyright (C) 2017 Anand Tiwari
-#
-# Email:   anandtiwarics@gmail.com
-# Twitter: @anandtiwarics
-#
-# This file is part of ArcherySec Project.
+# VAPT Security Platform
 
 import base64
 import re
@@ -20,7 +7,12 @@ import time
 from datetime import datetime
 
 import jwt
-import magic
+try:
+    import magic
+    LIBMAGIC_AVAILABLE = True
+except ImportError:
+    magic = None
+    LIBMAGIC_AVAILABLE = False
 from django.conf import settings
 from django.contrib import auth, messages
 from django.core.files.storage import FileSystemStorage
@@ -253,12 +245,13 @@ class ProfilePictureUploadAPIView(APIView):
         profile_picture = request.data.get("profile_picture")
 
         if profile_picture:
-            mime_type = magic.from_buffer(profile_picture.read(), mime=True)
-            allowed_types = ["image/jpeg", "image/png"]
-            if mime_type not in allowed_types:
-                raise ValidationError(
-                    f"File type not allowed. Allowed types: {allowed_types}"
-                )
+            if LIBMAGIC_AVAILABLE:
+                mime_type = magic.from_buffer(profile_picture.read(), mime=True)
+                allowed_types = ["image/jpeg", "image/png"]
+                if mime_type not in allowed_types:
+                    raise ValidationError(
+                        f"File type not allowed. Allowed types: {allowed_types}"
+                    )
 
             filename = profile_picture.name
             fs = FileSystemStorage(location=settings.MEDIA_ROOT)

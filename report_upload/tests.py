@@ -1,18 +1,5 @@
 # -*- coding: utf-8 -*-
-#                    _
-#     /\            | |
-#    /  \   _ __ ___| |__   ___ _ __ _   _
-#   / /\ \ | '__/ __| '_ \ / _ \ '__| | | |
-#  / ____ \| | | (__| | | |  __/ |  | |_| |
-# /_/    \_\_|  \___|_| |_|\___|_|   \__, |
-#                                     __/ |
-#                                    |___/
-# Copyright (C) 2017 Anand Tiwari
-#
-# Email:   anandtiwarics@gmail.com
-# Twitter: @anandtiwarics
-#
-# This file is part of ArcherySec Project.
+# VAPT Security Platform
 
 import logging
 
@@ -22,7 +9,15 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client, TestCase
 
 from authentication.tests import UserCreationTest
-from compliance.models import *
+try:
+    from compliance.models import *
+    COMPLIANCE_AVAILABLE = True
+except ImportError:
+    DockleScanDb = None
+    InspecScanDb = None
+    DockleScanResultsDb = None
+    InspecScanResultsDb = None
+    COMPLIANCE_AVAILABLE = False
 from networkscanners.models import *
 from projects.models import *
 from staticscanners.models import *

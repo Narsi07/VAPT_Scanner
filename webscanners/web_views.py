@@ -1,18 +1,5 @@
 # -*- coding: utf-8 -*-
-#                    _
-#     /\            | |
-#    /  \   _ __ ___| |__   ___ _ __ _   _
-#   / /\ \ | '__/ __| '_ \ / _ \ '__| | | |
-#  / ____ \| | | (__| | | |  __/ |  | |_| |
-# /_/    \_\_|  \___|_| |_|\___|_|   \__, |
-#                                     __/ |
-#                                    |___/
-# Copyright (C) 2017 Anand Tiwari
-#
-# Email:   anandtiwarics@gmail.com
-# Twitter: @anandtiwarics
-#
-# This file is part of ArcherySec Project.
+# VAPT Security Platform
 
 import json
 import os
@@ -34,7 +21,7 @@ from rest_framework.renderers import TemplateHTMLRenderer
 from rest_framework.views import APIView
 
 from projects.models import ProjectDb
-from scanners.scanner_plugin.web_scanner import burp_plugin, zap_plugin
+from scanners.scanner_plugin.web_scanner import zap_plugin
 from user_management import permissions
 from webscanners.models import (WebScansDb, cookie_db, excluded_db,
                                 task_schedule_db)

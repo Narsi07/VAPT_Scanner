@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.core.mail import send_mail
 
-from archerysettings.models import EmailDb
+from vaptsettings.models import EmailDb
 
 
 def email_sch_notify(subject, message):

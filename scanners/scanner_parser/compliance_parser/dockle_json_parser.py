@@ -1,24 +1,19 @@
 # -*- coding: utf-8 -*-
-#                    _
-#     /\            | |
-#    /  \   _ __ ___| |__   ___ _ __ _   _
-#   / /\ \ | '__/ __| '_ \ / _ \ '__| | | |
-#  / ____ \| | | (__| | | |  __/ |  | |_| |
-# /_/    \_\_|  \___|_| |_|\___|_|   \__, |
-#                                     __/ |
-#                                    |___/
-# Copyright (C) 2017 Anand Tiwari
-#
-# Email:   anandtiwarics@gmail.com
-# Twitter: @anandtiwarics
-#
-# This file is part of ArcherySec Project.
+# VAPT Security Platform
 
 
 import uuid
 
-from archeryapi.models import OrgAPIKey
-from compliance.models import DockleScanDb, DockleScanResultsDb
+from vaptapi.models import OrgAPIKey
+try:
+    from compliance.models import DockleScanDb, DockleScanResultsDb
+    COMPLIANCE_AVAILABLE = True
+except ImportError:
+    DockleScanDb = None
+    InspecScanDb = None
+    DockleScanResultsDb = None
+    InspecScanResultsDb = None
+    COMPLIANCE_AVAILABLE = False
 from utility.email_notify import email_sch_notify
 
 status = None

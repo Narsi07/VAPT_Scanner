@@ -1,19 +1,6 @@
 # -*- coding: utf-8 -*-
-#                    _
-#     /\            | |
-#    /  \   _ __ ___| |__   ___ _ __ _   _
-#   / /\ \ | '__/ __| '_ \ / _ \ '__| | | |
-#  / ____ \| | | (__| | | |  __/ |  | |_| |
-# /_/    \_\_|  \___|_| |_|\___|_|   \__, |
-#                                     __/ |
-#                                    |___/
-# Copyright (C) 2017 Anand Tiwari
-#
-# Email:   anandtiwarics@gmail.com
-# Twitter: @anandtiwarics
-#
-# This file is part of ArcherySec Project.
-""" Author: Anand Tiwari """
+# VAPT Security Platform
+
 
 from __future__ import unicode_literals
 
@@ -41,9 +28,12 @@ from rest_framework.renderers import TemplateHTMLRenderer
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from archerysettings import load_settings, save_settings
-from archerysettings.models import EmailDb, SettingsDb
-from jiraticketing.models import jirasetting
+from vaptsettings import load_settings, save_settings
+from vaptsettings.models import EmailDb, SettingsDb
+try:
+    from jiraticketing.models import jirasetting
+except Exception:
+    jirasetting = None
 from networkscanners.models import (NetworkScanDb, NetworkScanResultsDb,
                                     TaskScheduleDb)
 from networkscanners.serializers import (NetworkScanDbSerializer,
@@ -51,8 +41,15 @@ from networkscanners.serializers import (NetworkScanDbSerializer,
                                          OpenvasScansSerializer,
                                          OpenvasSettingsSerializer)
 from projects.models import ProjectDb
-from scanners.scanner_plugin.network_scanner.openvas_plugin import (
-    OpenVAS_Plugin, vuln_an_id)
+try:
+    from scanners.scanner_plugin.network_scanner.openvas_plugin import (
+        OpenVAS_Plugin, vuln_an_id)
+    OPENVAS_AVAILABLE = True
+except Exception as e:
+    OPENVAS_AVAILABLE = False
+    OpenVAS_Plugin = None
+    vuln_an_id = None
+    print(f"[VAPT] OpenVAS plugin could not be loaded: {e}")
 from user_management import permissions
 
 api_data = os.getcwd() + "/" + "apidata.json"
@@ -325,7 +322,7 @@ class OpenvasDetails(APIView):
                 }
             )
         else:
-            return HttpResponseRedirect(reverse("archerysettings:settings"))
+            return HttpResponseRedirect(reverse("vaptsettings:settings"))
 
 
 class OpenvasSetting(APIView):
@@ -541,7 +538,7 @@ class OpenvasSettingEnableDetails(APIView):
             enabled=nv_enabled, version=nv_version, online=nv_online, timing=nv_timing
         )
 
-        return HttpResponseRedirect(reverse("archerysettings:settings"))
+        return HttpResponseRedirect(reverse("vaptsettings:settings"))
 
 
 class NetworkScanList(APIView):

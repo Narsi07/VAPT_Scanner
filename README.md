@@ -112,9 +112,9 @@ sudo wget https://raw.githubusercontent.com/vulnersCom/nmap-vulners/master/vulne
 
 - Edit file webscanners/web_views.py
 - Search def signup function and comment @public decorator
-- Edit file archeryapi/views.py
+- Edit file vaptapi/views.py
 - Search def class CreateUsers and comment @public decorator
-- Edit file archerysecurity/settings/base.py
+- Edit file vapt/settings/base.py
 - Search STRONGHOLD_PUBLIC_URLS
 - Comment r'^/api/createuser/$',
 
@@ -215,7 +215,7 @@ Database name for the postgres db server
 
 #### `DJANGO_SETTINGS_MODULE` <!-- omit in toc -->
 
-Django setting to use. currently this can be set to `archerysecurity.settings.development` or `archerysecurity.settings.production` depending on your needs
+Django setting to use. currently this can be set to `vapt.settings.development` or `vapt.settings.production` depending on your needs
 
 #### `DJANGO_SECRET_KEY` <!-- omit in toc -->
 

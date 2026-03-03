@@ -1,18 +1,5 @@
 # -*- coding: utf-8 -*-
-#                    _
-#     /\            | |
-#    /  \   _ __ ___| |__   ___ _ __ _   _
-#   / /\ \ | '__/ __| '_ \ / _ \ '__| | | |
-#  / ____ \| | | (__| | | |  __/ |  | |_| |
-# /_/    \_\_|  \___|_| |_|\___|_|   \__, |
-#                                     __/ |
-#                                    |___/
-# Copyright (C) 2017 Anand Tiwari
-#
-# Email:   anandtiwarics@gmail.com
-# Twitter: @anandtiwarics
-#
-# This file is part of ArcherySec Project.
+# VAPT Security Platform
 
 import ast
 import hashlib
@@ -25,7 +12,7 @@ from dashboard.views import trend_update
 from scanners.vuln_checker import check_false_positive
 from utility.email_notify import email_sch_notify
 from webscanners.models import WebScanResultsDb, WebScansDb
-from archeryapi.models import OrgAPIKey
+from vaptapi.models import OrgAPIKey
 
 vul_col = ""
 title = ""
