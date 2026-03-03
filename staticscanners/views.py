@@ -4,11 +4,20 @@
 from __future__ import unicode_literals
 
 import hashlib
+import json
+import os
+import subprocess
+import threading
+import uuid
+from datetime import datetime
 
 from django.core import signing
 from django.shortcuts import HttpResponseRedirect, render
 from django.urls import reverse
-from jira import JIRA
+try:
+    from jira import JIRA
+except ImportError:
+    JIRA = None
 from notifications.models import Notification
 from notifications.signals import notify
 from rest_framework import status
@@ -17,7 +26,10 @@ from rest_framework.renderers import TemplateHTMLRenderer
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from jiraticketing.models import jirasetting
+try:
+    from jiraticketing.models import jirasetting
+except ImportError:
+    jirasetting = None
 from staticscanners.models import StaticScanResultsDb, StaticScansDb
 from staticscanners.serializers import (StaticScanDbSerializer,
                                         StaticScanResultsDbSerializer)
@@ -319,3 +331,239 @@ class SastScanVulnList(APIView):
                 "scan_id": scan_id,
             },
         )
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# BANDIT SCANNER
+# ─────────────────────────────────────────────────────────────────────────────
+
+def _bandit_severity(sev):
+    mapping = {"HIGH": "High", "MEDIUM": "Medium", "LOW": "Low"}
+    return mapping.get(sev.upper(), "Informational")
+
+def _bandit_color(sev):
+    mapping = {"High": "danger", "Medium": "warning", "Low": "info"}
+    return mapping.get(sev, "info")
+
+
+def _run_bandit_scan(scan_path, project_id, scan_id, user, organization):
+    """Run bandit in a background thread and save results."""
+    date_time = datetime.now()
+    try:
+        result = subprocess.run(
+            ["bandit", "-r", scan_path, "-f", "json", "-q"],
+            capture_output=True, text=True, timeout=300
+        )
+        output = result.stdout or result.stderr
+        data = json.loads(output)
+        results = data.get("results", [])
+
+        total_high = total_medium = total_low = total_info = 0
+
+        for item in results:
+            sev = _bandit_severity(item.get("issue_severity", "LOW"))
+            sev_color = _bandit_color(sev)
+            title = item.get("issue_text", "Unknown Issue")
+            filename = item.get("filename", "")
+            line = str(item.get("line_number", ""))
+            cwe = item.get("issue_cwe", {}).get("id", "")
+            ref = item.get("more_info", "")
+
+            dup_data = title + filename + str(line)
+            dup_hash = hashlib.sha256(dup_data.encode()).hexdigest()
+
+            StaticScanResultsDb(
+                vuln_id=uuid.uuid4(),
+                scan_id=scan_id,
+                project_id=project_id,
+                title=title,
+                severity=sev,
+                severity_color=sev_color,
+                fileName=filename + ":" + line,
+                description="CWE-" + str(cwe) if cwe else title,
+                reference=ref,
+                false_positive="No",
+                vuln_status="Open",
+                vuln_duplicate="No",
+                scanner="Bandit",
+                organization=organization,
+            ).save()
+
+            if sev == "High": total_high += 1
+            elif sev == "Medium": total_medium += 1
+            elif sev == "Low": total_low += 1
+            else: total_info += 1
+
+        total_vul = total_high + total_medium + total_low + total_info
+        StaticScansDb.objects.filter(scan_id=scan_id).update(
+            scan_status="100",
+            total_vul=total_vul,
+            high_vul=total_high,
+            medium_vul=total_medium,
+            low_vul=total_low,
+            info_vul=total_info,
+        )
+        notify.send(user, recipient=user, verb="Bandit scan completed: %d issues" % total_vul)
+    except FileNotFoundError:
+        StaticScansDb.objects.filter(scan_id=scan_id).update(scan_status="Failed: bandit not installed")
+        print("[VAPT] bandit not found. Install: pip install bandit")
+    except Exception as e:
+        StaticScansDb.objects.filter(scan_id=scan_id).update(scan_status="Failed")
+        print("[VAPT] Bandit error:", e)
+
+
+class BanditScanLaunch(APIView):
+    renderer_classes = [TemplateHTMLRenderer]
+    template_name = "staticscanners/scans/list_scans.html"
+    permission_classes = (IsAuthenticated, permissions.IsAnalyst)
+
+    def post(self, request):
+        user = request.user
+        scan_path = request.POST.get("scan_path", "").strip()
+        project_id = request.POST.get("project_id", None)
+
+        if not scan_path or not os.path.exists(scan_path):
+            notify.send(user, recipient=user, verb="Bandit: invalid or missing scan path")
+            return HttpResponseRedirect(reverse("staticscanners:list_scans"))
+
+        scan_id = uuid.uuid4()
+        date_time = datetime.now()
+
+        StaticScansDb(
+            scan_id=scan_id,
+            project_id=project_id,
+            scan_url=scan_path,
+            date_time=date_time,
+            scanner="Bandit",
+            scan_status="Scanning",
+            organization=request.user.organization,
+        ).save()
+
+        thread = threading.Thread(
+            target=_run_bandit_scan,
+            args=(scan_path, project_id, scan_id, user, request.user.organization)
+        )
+        thread.daemon = True
+        thread.start()
+
+        notify.send(user, recipient=user, verb="Bandit scan started on %s" % scan_path)
+        return HttpResponseRedirect(reverse("staticscanners:list_scans"))
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SEMGREP SCANNER
+# ─────────────────────────────────────────────────────────────────────────────
+
+def _semgrep_severity(sev):
+    mapping = {"ERROR": "High", "WARNING": "Medium", "INFO": "Low"}
+    return mapping.get(sev.upper(), "Informational")
+
+def _semgrep_color(sev):
+    mapping = {"High": "danger", "Medium": "warning", "Low": "info"}
+    return mapping.get(sev, "info")
+
+
+def _run_semgrep_scan(scan_path, project_id, scan_id, user, organization):
+    """Run semgrep in a background thread and save results."""
+    date_time = datetime.now()
+    try:
+        result = subprocess.run(
+            ["semgrep", "--config", "auto", scan_path, "--json", "--quiet"],
+            capture_output=True, text=True, timeout=600
+        )
+        output = result.stdout
+        data = json.loads(output)
+        results = data.get("results", [])
+
+        total_high = total_medium = total_low = total_info = 0
+
+        for item in results:
+            raw_sev = item.get("extra", {}).get("severity", "INFO")
+            sev = _semgrep_severity(raw_sev)
+            sev_color = _semgrep_color(sev)
+            title = item.get("check_id", "Unknown Rule")
+            filename = item.get("path", "")
+            line = str(item.get("start", {}).get("line", ""))
+            description = item.get("extra", {}).get("message", title)
+            ref = item.get("extra", {}).get("references", [""])
+            ref = ref[0] if ref else ""
+
+            dup_data = title + filename + line
+            dup_hash = hashlib.sha256(dup_data.encode()).hexdigest()
+
+            StaticScanResultsDb(
+                vuln_id=uuid.uuid4(),
+                scan_id=scan_id,
+                project_id=project_id,
+                title=title,
+                severity=sev,
+                severity_color=sev_color,
+                fileName=filename + ":" + line,
+                description=description,
+                reference=ref,
+                false_positive="No",
+                vuln_status="Open",
+                vuln_duplicate="No",
+                scanner="Semgrep",
+                organization=organization,
+            ).save()
+
+            if sev == "High": total_high += 1
+            elif sev == "Medium": total_medium += 1
+            elif sev == "Low": total_low += 1
+            else: total_info += 1
+
+        total_vul = total_high + total_medium + total_low + total_info
+        StaticScansDb.objects.filter(scan_id=scan_id).update(
+            scan_status="100",
+            total_vul=total_vul,
+            high_vul=total_high,
+            medium_vul=total_medium,
+            low_vul=total_low,
+            info_vul=total_info,
+        )
+        notify.send(user, recipient=user, verb="Semgrep scan completed: %d issues" % total_vul)
+    except FileNotFoundError:
+        StaticScansDb.objects.filter(scan_id=scan_id).update(scan_status="Failed: semgrep not installed")
+        print("[VAPT] semgrep not found. Install: pip install semgrep")
+    except Exception as e:
+        StaticScansDb.objects.filter(scan_id=scan_id).update(scan_status="Failed")
+        print("[VAPT] Semgrep error:", e)
+
+
+class SemgrepScanLaunch(APIView):
+    renderer_classes = [TemplateHTMLRenderer]
+    template_name = "staticscanners/scans/list_scans.html"
+    permission_classes = (IsAuthenticated, permissions.IsAnalyst)
+
+    def post(self, request):
+        user = request.user
+        scan_path = request.POST.get("scan_path", "").strip()
+        project_id = request.POST.get("project_id", None)
+
+        if not scan_path or not os.path.exists(scan_path):
+            notify.send(user, recipient=user, verb="Semgrep: invalid or missing scan path")
+            return HttpResponseRedirect(reverse("staticscanners:list_scans"))
+
+        scan_id = uuid.uuid4()
+        date_time = datetime.now()
+
+        StaticScansDb(
+            scan_id=scan_id,
+            project_id=project_id,
+            scan_url=scan_path,
+            date_time=date_time,
+            scanner="Semgrep",
+            scan_status="Scanning",
+            organization=request.user.organization,
+        ).save()
+
+        thread = threading.Thread(
+            target=_run_semgrep_scan,
+            args=(scan_path, project_id, scan_id, user, request.user.organization)
+        )
+        thread.daemon = True
+        thread.start()
+
+        notify.send(user, recipient=user, verb="Semgrep scan started on %s" % scan_path)
+        return HttpResponseRedirect(reverse("staticscanners:list_scans"))

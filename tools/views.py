@@ -203,74 +203,51 @@ class NiktoScanLaunch(APIView):
             dump_scans.save()
             HttpResponseRedirect(reverse("tools:nikto"))
 
-            try:
-                # Try WSL nikto first (for Windows users with Nikto in WSL)
-                nikto_output = subprocess.check_output(
-                    [
-                        "wsl",
-                        "nikto",
-                        "-o",
-                        nikto_wsl_path,
-                        "-Format",
-                        "htm",
-                        "-Tuning",
-                        "123bde",
-                        "-host",
-                        scans_url,
-                    ]
-                )
-                f = codecs.open(nikto_res_path, "r")
-                data = f.read()
+            # Try native nikto (Kali Linux: sudo apt install nikto)
+            nikto_launched = False
+            for nikto_cmd in ["nikto", "nikto.pl"]:
                 try:
-                    nikto_html_parser(
-                        data,
-                        project_id,
-                        scan_id,
-                    )
-                    notify.send(user, recipient=user, verb="Nikto Scan Completed")
-                    NiktoResultDb.objects.filter(scan_id=scan_id).update(
-                        nikto_status="Scan Completed"
-                    )
-                except Exception as e:
-                    print(e)
-
-            except Exception as e:
-                print(e)
-
-                try:
-                    print("New command running (native nikto.pl)......")
-                    print(scans_url)
+                    print("[VAPT] Running: {} -h {}".format(nikto_cmd, scans_url))
                     nikto_output = subprocess.check_output(
                         [
-                            "nikto.pl",
+                            nikto_cmd,
+                            "-h",
+                            scans_url,
                             "-o",
                             nikto_res_path,
                             "-Format",
                             "htm",
                             "-Tuning",
                             "123bde",
-                            "-host",
-                            scans_url,
-                        ]
+                        ],
+                        timeout=300,
+                        stderr=subprocess.STDOUT,
                     )
-                    print(nikto_output)
+                    nikto_launched = True
+                    break
+                except FileNotFoundError:
+                    print("[VAPT] {} not found, trying fallback...".format(nikto_cmd))
+                except subprocess.TimeoutExpired:
+                    print("[VAPT] Nikto scan timed out")
+                    break
+                except Exception as e:
+                    print("[VAPT] Nikto error: {}".format(e))
+
+            if nikto_launched and os.path.isfile(nikto_res_path):
+                try:
                     f = codecs.open(nikto_res_path, "r")
                     data = f.read()
-                    try:
-                        nikto_html_parser(
-                            data,
-                            project_id,
-                            scan_id,
-                        )
-                        notify.send(user, recipient=user, verb="Nikto Scan Completed")
-                        NiktoResultDb.objects.filter(
-                            scan_id=scan_id, organization=request.user.organization
-                        ).update(nikto_status="Scan Completed")
-                    except Exception as e:
-                        print(e)
-
+                    nikto_html_parser(data, project_id, scan_id)
+                    notify.send(user, recipient=user, verb="Nikto Scan Completed")
+                    NiktoResultDb.objects.filter(
+                        scan_id=scan_id, organization=request.user.organization
+                    ).update(nikto_status="Scan Completed")
                 except Exception as e:
-                    print(e)
+                    print("[VAPT] Nikto parse error: {}".format(e))
+            else:
+                NiktoResultDb.objects.filter(
+                    scan_id=scan_id, organization=request.user.organization
+                ).update(nikto_status="Scan Failed — nikto not installed?")
 
         return HttpResponseRedirect(reverse("tools:nikto"))
 

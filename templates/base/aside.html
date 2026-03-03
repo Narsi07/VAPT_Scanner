@@ -115,10 +115,24 @@
                                         </a>
                                         <ul aria-expanded="false" class="collapse first-level">
                                                 <li class="sidebar-item">
-                                                        <a href="{% url 'staticscanners:list_scans' %}"
+                                                        <a href="{% url 'staticscanners:bandit_scan' %}"
                                                                 class="sidebar-link">
                                                                 <i class="fas fa-exclamation-triangle"></i>
-                                                                <span class="hide-menu"> Bandit / Semgrep </span>
+                                                                <span class="hide-menu"> Bandit </span>
+                                                        </a>
+                                                </li>
+                                                <li class="sidebar-item">
+                                                        <a href="{% url 'staticscanners:semgrep_scan' %}"
+                                                                class="sidebar-link">
+                                                                <i class="fas fa-search-dollar"></i>
+                                                                <span class="hide-menu"> Semgrep </span>
+                                                        </a>
+                                                </li>
+                                                <li class="sidebar-item">
+                                                        <a href="{% url 'staticscanners:list_scans' %}"
+                                                                class="sidebar-link">
+                                                                <i class="fas fa-list"></i>
+                                                                <span class="hide-menu"> Scan Results </span>
                                                         </a>
                                                 </li>
                                         </ul>

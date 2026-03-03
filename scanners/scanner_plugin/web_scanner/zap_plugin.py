@@ -70,23 +70,59 @@ def get_free_tcp_port():
     return port
 
 
+def _find_zap_executable():
+    """
+    Auto-detect ZAP executable on Kali Linux and other systems.
+    Priority: 'which zaproxy' > /usr/share/zaproxy/zap.sh > /usr/bin/zaproxy > fallback
+    """
+    # 1. Try 'zaproxy' command (Kali apt install zaproxy)
+    try:
+        result = subprocess.check_output(["which", "zaproxy"], stderr=subprocess.DEVNULL)
+        path = result.decode().strip()
+        if path:
+            return path, os.path.dirname(path)
+    except Exception:
+        pass
+
+    # 2. Try known Kali path
+    kali_zap = "/usr/share/zaproxy/zap.sh"
+    if os.path.isfile(kali_zap):
+        return kali_zap, "/usr/share/zaproxy"
+
+    # 3. Try common Linux path
+    linux_zap = "/usr/bin/zaproxy"
+    if os.path.isfile(linux_zap):
+        return linux_zap, "/usr/bin"
+
+    # 4. Try 'which zap.sh'
+    try:
+        result = subprocess.check_output(["which", "zap.sh"], stderr=subprocess.DEVNULL)
+        path = result.decode().strip()
+        if path:
+            return path, os.path.dirname(path)
+    except Exception:
+        pass
+
+    print("[VAPT] ZAP executable not found. Install with: sudo apt install zaproxy")
+    return None, None
+
+
 def zap_local():
     random_port = str(get_free_tcp_port())
-    zap_path = "/home/archerysec/app/zap/"
-    executable = "zap.sh"
-    executable_path = os.path.join(zap_path, executable)
+
+    executable_path, zap_dir = _find_zap_executable()
+    if executable_path is None:
+        return None
 
     zap_command = [
         executable_path,
         "-daemon",
         "-config",
-        "api.disablekey=false",
-        "-config",
-        "api.key=" + zap_api_key,
+        "api.disablekey=true",
         "-port",
         random_port,
         "-host",
-        zap_hosts,
+        "127.0.0.1",
         "-config",
         "api.addrs.addr.name=.*",
         "-config",
@@ -98,43 +134,48 @@ def zap_local():
     with open(log_path, "w+") as log_file:
         try:
             subprocess.Popen(
-                zap_command, cwd=zap_path, stdout=log_file, stderr=subprocess.STDOUT
+                zap_command,
+                cwd=zap_dir,
+                stdout=log_file,
+                stderr=subprocess.STDOUT,
             )
             return random_port
         except FileNotFoundError:
-            print("ZAP execution failed: Could not find {} in {}".format(executable, zap_path))
+            print("[VAPT] ZAP execution failed: could not run {}".format(executable_path))
             return None
         except Exception as e:
-            print("ZAP execution error: {}".format(e))
+            print("[VAPT] ZAP execution error: {}".format(e))
             return None
 
 
 def zap_connect(random_port):
     all_zap = ZapSettingsDb.objects.filter()
 
-    zap_api_key = "none"
-    zap_hosts = "none"
-    zap_ports = "none"
+    _api_key = ""
+    _host = "127.0.0.1"
+    _port = random_port
     zap_enabled = False
 
     for zap in all_zap:
         zap_enabled = zap.enabled
 
-    if zap_enabled is False:
-        zap_api_key = "none"
-        zap_hosts = "none"
-        zap_ports = random_port
-
     if zap_enabled is True:
+        # Remote mode: use configured host/port/key
         for zap in all_zap:
-            zap_api_key = zap.zap_api
-            zap_hosts = zap.zap_url
-            zap_ports = zap.zap_port
+            _api_key = zap.zap_api or ""
+            _host = zap.zap_url or "127.0.0.1"
+            _port = zap.zap_port or "8080"
+    else:
+        # Local mode: ZAP was started on localhost on random_port
+        _api_key = ""
+        _host = "127.0.0.1"
+        _port = random_port
+
     zap = ZAPv2(
-        apikey=zap_api_key,
+        apikey=_api_key,
         proxies={
-            "http": "http://" + zap_hosts + ":" + str(zap_ports),
-            "https": "https://" + zap_hosts + ":" + str(zap_ports),
+            "http": "http://{}:{}".format(_host, _port),
+            "https": "http://{}:{}".format(_host, _port),
         },
     )
     return zap

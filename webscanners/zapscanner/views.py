@@ -182,7 +182,7 @@ def launch_zap_scan(target_url, project_id, rescan_id, rescan, scan_id, user, re
 
     notify.send(user, recipient=user, verb="ZAP Scan URL %s Completed" % target_url)
 
-    subject = "Archery Tool Scan Status - ZAP Scan Completed"
+    subject = "VAPT Scan Status - ZAP Scan Completed"
     message = (
         "ZAP Scanner has completed the scan "
         "  %s <br> Total: %s <br>High: %s <br>"
@@ -280,7 +280,7 @@ def launch_schudle_zap_scan(
         total_medium = data.medium_vul
         total_low = data.low_vul
 
-    subject = "Archery Tool Scan Status - ZAP Scan Completed"
+    subject = "VAPT Scan Status - ZAP Scan Completed"
     message = (
         "ZAP Scanner has completed the scan "
         "  %s <br> Total: %s <br>High: %s <br>"

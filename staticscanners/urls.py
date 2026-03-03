@@ -16,4 +16,8 @@ urlpatterns = [
     path("scan_delete/", views.SastScanDelete.as_view(), name="scan_delete"),
     path("vuln_delete/", views.SastScanVulnDelete.as_view(), name="vuln_delete"),
     path("vuln_mark/", views.SastScanVulnMark.as_view(), name="vuln_mark"),
+    # Bandit scanner
+    path("bandit_scan/", views.BanditScanLaunch.as_view(), name="bandit_scan"),
+    # Semgrep scanner
+    path("semgrep_scan/", views.SemgrepScanLaunch.as_view(), name="semgrep_scan"),
 ]

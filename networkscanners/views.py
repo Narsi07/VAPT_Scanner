@@ -101,14 +101,14 @@ def openvas_scanner(scan_ip, project_id, sel_profile, user, request):
         scanner = openvas.connect()
     except Exception:
         notify.send(user, recipient=user, verb="OpenVAS Setting not configured")
-        subject = "Archery Tool Notification"
+        subject = "VAPT Notification"
         message = "OpenVAS Scanner failed due to setting not found "
 
         email_notify(user=user, subject=subject, message=message)
         return
 
     notify.send(user, recipient=user, verb="OpenVAS Scan Started")
-    subject = "Archery Tool Notification"
+    subject = "VAPT Notification"
     message = "OpenVAS Scan Started"
 
     email_notify(user=user, subject=subject, message=message)
@@ -140,7 +140,7 @@ def openvas_scanner(scan_ip, project_id, sel_profile, user, request):
         total_medium = openvas.medium_vul
         total_low = openvas.low_vul
 
-    subject = "Archery Tool Notification"
+    subject = "VAPT Notification"
     message = (
         "OpenVAS Scan Completed  <br>"
         "Total: %s  <br>Total High: %s <br>"
