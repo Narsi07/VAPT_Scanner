@@ -3,67 +3,84 @@
 <html lang="en">
 
 <head>
-    <title>VAPT</title>
-    <link rel="icon" href="{% static 'logo.png' %}" type="image/x-icon">
+    <title>VAPT — Sign In</title>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!--<link rel="stylesheet" type="text/css" href="{% static 'polls/style.css' %}">-->
-    <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.min.css' %}" />
-    <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap-responsive.min.css' %}" />
-    <link rel="stylesheet" type="text/css" href="{% static 'css/archery-login.css' %}" />
-    <link href="{% static 'font-awesome/css/font-awesome.css' %}" rel="stylesheet" />
-    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700,800' rel='stylesheet' type='text/css'>
-
+    <meta name="description" content="VAPT Security Platform — Vulnerability Assessment & Penetration Testing" />
+    <link rel="icon" href="{% static 'logo.png' %}" type="image/x-icon">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/vapt-login.css' %}">
 </head>
 
 <body>
-    <div id="loginbox">
-        <form id="loginform" class="form-vertical" action="{% url 'auth' %}" method="POST">{% csrf_token %}
-            <div class="control-group normal_text">
-                <h1 style="color: white; font-weight: 800; letter-spacing: 3px; margin-top: 10px;">VAPT</h1>
+    <div class="login-wrapper">
+        <div class="login-card">
+
+            <!-- Brand -->
+            <div class="brand-section">
+                <div class="brand-logo">
+                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path
+                            d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 4l6 2.67V11c0 3.94-2.65 7.61-6 8.93-3.35-1.32-6-4.99-6-8.93V7.67L12 5zm-1 5v5h2v-5h-2zm0-4v2h2V6h-2z" />
+                    </svg>
+                </div>
+                <div class="brand-title">VA<span>PT</span></div>
+                <div class="brand-subtitle">Vulnerability Assessment & Penetration Testing</div>
             </div>
-            <div class="control-group">
-                <div class="controls">
-                    <div class="main_input_box">
-                        {% if messages %}
-                        <ul class="messages" style="margin: 20px 20px 20px 20px;">
-                            {% for msg in messages %}
-                            <div class="alert alert-{{ msg.level_tag }}" role="alert">
-                                {{ msg.message }}
-                            </div>
-                            {% endfor %}
-                        </ul>
-                        {% endif %}
-                        <span class="add-on bg_lg">
-                            <i class="icon-user"></i>
-                        </span>
-                        <input type="text" name="username" id="username" class="form-control" placeholder="Username"
-                            value="">
+
+            <!-- Scanning animation -->
+            <div class="scan-indicator">
+                <div class="scan-dot"></div>
+                <div class="scan-dot"></div>
+                <div class="scan-dot"></div>
+            </div>
+
+            <!-- Messages -->
+            {% if messages %}
+            {% for msg in messages %}
+            <div class="alert">
+                <i class="fas fa-exclamation-circle" style="margin-right:6px;"></i>{{ msg.message }}
+            </div>
+            {% endfor %}
+            {% endif %}
+
+            <!-- Login Form -->
+            <form id="loginform" action="{% url 'auth' %}" method="POST">
+                {% csrf_token %}
+
+                <div class="form-group">
+                    <label class="form-label">Username / Email</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-user input-icon"></i>
+                        <input type="text" name="username" id="username" class="form-control"
+                            placeholder="Enter your email" autocomplete="username">
                     </div>
                 </div>
-            </div>
-            <div class="control-group">
-                <div class="controls">
-                    <div class="main_input_box">
-                        <span class="add-on bg_ly">
-                            <i class="icon-lock"></i>
-                        </span>
+
+                <div class="form-group">
+                    <label class="form-label">Password</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-lock input-icon"></i>
                         <input type="password" name="password" id="password" class="form-control"
-                            placeholder="Password">
+                            placeholder="Enter your password" autocomplete="current-password">
                     </div>
                 </div>
-            </div>
-            <div class="form-actions">
-                {# <span class="pull-left"><a href="{% url 'webscanners:signup' %}" class="btn btn-lg btn-primary" #} {#
-                        type="submit" tabindex="2">Sign Up</a></span>#}
 
-                <span class="pull-right"><button class="btn btn-lg btn-primary " type="submit">Sign in</button></span>
+                <button type="submit" class="btn-signin">
+                    <i class="fas fa-shield-alt" style="margin-right:8px;"></i>Sign In Securely
+                </button>
+            </form>
+
+            <div class="login-footer">
+                VAPT Security Platform &mdash; Authorized Users Only
             </div>
-        </form>
+        </div>
     </div>
-
-    <script src="{% static 'js/jquery.min.js' %}"></script>
-    <script src="{% static 'js/archery.login.js' %}"></script>
 </body>
 
 </html>

@@ -3,32 +3,43 @@
 <html lang="en">
 
 <head>
-    <title>VAPT</title>
-    <link rel="icon" href="/static/logo.png" type="image/x-icon">
+    <title>VAPT — Signed Out</title>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}" />
-    <link rel="stylesheet" href="{% static 'css/bootstrap-responsive.min.css' %}" />
-    <link rel="stylesheet" href="{% static 'css/archery-login.css' %}" />
-    <link href="{% static 'font-awesome/css/font-awesome.css' %}" rel="stylesheet" />
-    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700,800' rel='stylesheet' type='text/css'>
-
+    <link rel="icon" href="{% static 'logo.png' %}" type="image/x-icon">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/vapt-login.css' %}">
 </head>
 
-<body class="bg-dark" id="page-top">
-    <div id="loginbox">
-        <div class="control-group">
-            <div class="controls">
-                <div class="main_input_box">
-                    <div>
-                        <p2>Thanks for using portal. <a href="{% url 'login' %}">Login Again</a></p2>
-                    </div>
+<body>
+    <div class="login-wrapper">
+        <div class="login-card" style="text-align:center;">
+            <div class="brand-section">
+                <div class="brand-logo">
+                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
+                        <path
+                            d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 4l6 2.67V11c0 3.94-2.65 7.61-6 8.93-3.35-1.32-6-4.99-6-8.93V7.67L12 5zm-1 5v5h2v-5h-2zm0-4v2h2V6h-2z" />
+                    </svg>
                 </div>
+                <div class="brand-title">VA<span>PT</span></div>
+            </div>
+            <p style="color:#64748b; font-size:14px; margin-bottom:28px;">
+                <i class="fas fa-check-circle" style="color:#22c55e; margin-right:8px;"></i>
+                You have been signed out securely.
+            </p>
+            <a href="{% url 'login' %}" class="btn-signin"
+                style="display:inline-block; text-decoration:none; padding:14px 32px; width:auto;">
+                <i class="fas fa-sign-in-alt" style="margin-right:8px;"></i>Sign In Again
+            </a>
+            <div class="login-footer" style="margin-top:24px;">
+                VAPT Security Platform &mdash; Authorized Users Only
             </div>
         </div>
     </div>
-    <script src="{% static 'js/jquery.min.js' %}"></script>
-    <script src="{% static 'js/archery.login.js' %}"></script>
 </body>
 
 </html>
