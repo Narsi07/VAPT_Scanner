@@ -262,7 +262,9 @@ class NiktoScanResult(APIView):
     permission_classes = (IsAuthenticated,)
 
     def get(self, request):
-        scan_id = request.GET["scan_id"]
+        scan_id = request.GET.get("scan_id")
+        if not scan_id:
+            return HttpResponseRedirect(reverse("tools:nikto"))
         scan_result = NiktoResultDb.objects.filter(
             scan_id=scan_id, organization=request.user.organization
         )
