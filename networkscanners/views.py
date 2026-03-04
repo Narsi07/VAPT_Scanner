@@ -37,7 +37,12 @@ except Exception:
 
 
 def launch_hub(request):
-    return render(request, 'launch/network_scan.html')
+    try:
+        from projects.models import ProjectDb
+        all_projects = ProjectDb.objects.filter(organization=request.user.organization)
+    except Exception:
+        all_projects = []
+    return render(request, 'launch/network_scan.html', {'all_projects': all_projects})
 
 
 def results_hub(request):

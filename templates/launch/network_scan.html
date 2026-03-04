@@ -1,130 +1,155 @@
 {% extends 'dashboard/base.html' %}
 {% load static %}
-
 {% block body %}
-<style>
-    .scanner-toggle {
-        display: flex;
-        gap: 10px;
-        margin-bottom: 24px;
-        flex-wrap: wrap;
-    }
-
-    .scanner-toggle .btn-toggle {
-        padding: 10px 28px;
-        border-radius: 30px;
-        font-weight: 600;
-        font-size: 15px;
-        border: 2px solid #4f6af0;
-        color: #4f6af0;
-        background: #fff;
-        cursor: pointer;
-        transition: all 0.2s;
-    }
-
-    .scanner-toggle .btn-toggle.active,
-    .scanner-toggle .btn-toggle:hover {
-        background: #4f6af0;
-        color: #fff;
-    }
-
-    .scanner-panel {
-        display: none;
-    }
-
-    .scanner-panel.active {
-        display: block;
-    }
-</style>
 
 <div class="row">
     <div class="col-md-12">
         <div class="card">
             <div class="card-body">
-                <h2 class="card-title mb-1"><i class="fas fa-network-wired mr-2"></i> Network Scanning</h2>
-                <p class="text-muted mb-4">Select a scanner using the toggle buttons below to launch a scan.</p>
-
-                <!-- Toggle Buttons -->
-                <div class="scanner-toggle">
-                    <button class="btn-toggle active" onclick="showPanel('nmap', this)">
-                        <i class="fas fa-search-location mr-1"></i> Nmap Port Scan
-                    </button>
-                    <button class="btn-toggle" onclick="showPanel('vulners', this)">
-                        <i class="fas fa-bug mr-1"></i> Nmap + Vulners
-                    </button>
-                    <button class="btn-toggle" onclick="showPanel('openvas', this)">
-                        <i class="fas fa-shield-alt mr-1"></i> OpenVAS
-                    </button>
+                <div class="d-md-flex align-items-center">
+                    <h1 class="card-title"><i class="fas fa-network-wired mr-2"></i> Network Scan</h1>
                 </div>
-
-                <!-- Nmap Panel -->
-                <div id="panel-nmap" class="scanner-panel active">
-                    <div class="card border-0 shadow-sm">
-                        <div class="card-body">
-                            <h5><i class="fas fa-search-location mr-2 text-primary"></i> Nmap Port Scan</h5>
-                            <p class="text-muted small">Network discovery and port scanning. Identifies open ports,
-                                running services, and OS fingerprinting across single hosts or entire networks.</p>
-                            <span class="badge badge-info mb-3">Port Scanner</span>
-                            <hr>
-                            <a href="{% url 'tools:nmap_scan' %}" class="btn btn-primary">
-                                <i class="fas fa-rocket mr-1"></i> Launch Nmap Scan
-                            </a>
-                            <a href="{% url 'tools:nmap_result' %}" class="btn btn-outline-secondary ml-2">
-                                <i class="fas fa-list mr-1"></i> View Nmap Results
-                            </a>
+                <br>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <form id="start_scan" class="form-horizontal">{% csrf_token %}
+                                <div class="card-body">
+                                    <h4 class="card-title"></h4>
+                                    <div class="form-group row">
+                                        <label class="col-sm-3 text-right control-label col-form-label">Target
+                                            IP(s)</label>
+                                        <div class="col-sm-9">
+                                            <textarea class="form-control" type="text" name="ip_address" id="ip_address"
+                                                placeholder="192.168.1.1,192.168.1.0/24,example.com"></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card">
+                                    <div class="card-body">
+                                        <div class="form-group row">
+                                            <label
+                                                class="col-sm-3 text-right control-label col-form-label">Projects</label>
+                                            <div class="col-md-9">
+                                                <select id="project_id" name="project_id"
+                                                    class="select2 form-control custom-select"
+                                                    style="width: 100%; height:36px;">
+                                                    {% for data in all_projects %}
+                                                    <option value="{{ data.uu_id }}">{{ data.project_name }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="controls">
+                                            <input type="submit" class="btn btn-primary" value="Launch">
+                                        </div>
+                                        <div id='status'></div>
+                                    </div>
+                                </div>
+                            </form>
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
 
-                <!-- Nmap Vulners Panel -->
-                <div id="panel-vulners" class="scanner-panel">
-                    <div class="card border-0 shadow-sm">
-                        <div class="card-body">
-                            <h5><i class="fas fa-bug mr-2 text-danger"></i> Nmap + Vulners</h5>
-                            <p class="text-muted small">Combines Nmap with the Vulners vulnerability database to map
-                                detected services to known CVEs. Identifies exploitable vulnerabilities by version.</p>
-                            <span class="badge badge-danger mb-3">CVE Matcher</span>
-                            <hr>
-                            <a href="{% url 'tools:nmap_vulners' %}" class="btn btn-primary">
-                                <i class="fas fa-rocket mr-1"></i> Launch Nmap+Vulners
-                            </a>
-                            <a href="{% url 'tools:nmap_result' %}" class="btn btn-outline-secondary ml-2">
-                                <i class="fas fa-list mr-1"></i> View Results
-                            </a>
-                        </div>
+        <div class="card">
+            <div class="card-body">
+                <div class="d-md-flex align-items-center">
+                    <h5 class="card-title">Scanners</h5>
+                </div>
+                <br>
+                <p>Select your scanner(s) from the ones available:</p>
+                <div class="custom-control custom-control-inline">
+                    <div class="checkbox inline checkbox-slider--b-flat checkbox-slider--b" style="width: 200px;">
+                        <label>
+                            <input name="opt_nmap" type="checkbox"><span>Nmap Port Scan</span>
+                        </label>
+                    </div>
+                    <div class="checkbox inline checkbox-slider--b-flat checkbox-slider--b" style="width: 200px;">
+                        <label>
+                            <input name="opt_vulners" type="checkbox"><span>Nmap + Vulners</span>
+                        </label>
+                    </div>
+                    <div class="checkbox inline checkbox-slider--b-flat checkbox-slider--b" style="width: 200px;">
+                        <label>
+                            <input name="opt_openvas" type="checkbox"><span>OpenVAS</span>
+                        </label>
                     </div>
                 </div>
-
-                <!-- OpenVAS Panel -->
-                <div id="panel-openvas" class="scanner-panel">
-                    <div class="card border-0 shadow-sm">
-                        <div class="card-body">
-                            <h5><i class="fas fa-shield-alt mr-2 text-warning"></i> OpenVAS</h5>
-                            <p class="text-muted small">Full-featured network vulnerability scanner with 50,000+ tests.
-                                Deep infrastructure scanning for CVEs, misconfigurations, and compliance issues.</p>
-                            <span class="badge badge-warning mb-3">Infra Scanner</span>
-                            <hr>
-                            <a href="{% url 'networkscanners:ip_scan' %}" class="btn btn-primary">
-                                <i class="fas fa-rocket mr-1"></i> Launch OpenVAS Scan
-                            </a>
-                            <a href="{% url 'networkscanners:list_scans' %}" class="btn btn-outline-secondary ml-2">
-                                <i class="fas fa-list mr-1"></i> View Network Results
-                            </a>
-                        </div>
-                    </div>
-                </div>
-
             </div>
         </div>
     </div>
 </div>
 
-<script>
-    function showPanel(name, btn) {
-        document.querySelectorAll('.scanner-panel').forEach(p => p.classList.remove('active'));
-        document.querySelectorAll('.btn-toggle').forEach(b => b.classList.remove('active'));
-        document.getElementById('panel-' + name).classList.add('active');
-        btn.classList.add('active');
-    }
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.4/js/bootstrap-select.min.js"></script>
+
+<script type="text/javascript">
+    $(document).on('submit', '#start_scan', function (e) {
+        var opt = false;
+        e.preventDefault();
+
+        var ip = $('#ip_address').val();
+        var project_id = $('#project_id').val();
+        var csrf = $('input[name=csrfmiddlewaretoken]').val();
+
+        {% comment %}Loop through each IP if comma - separated, launch for each selected scanner{% endcomment %}
+        var ips = ip.split(',').map(function (s) { return s.trim(); }).filter(Boolean);
+
+        if ($('[name="opt_nmap"]').is(':checked')) {
+            opt = true;
+            ips.forEach(function (single_ip) {
+                $.ajax({
+                    type: 'POST',
+                    url: '{% url "tools:nmap_scan" %}',
+                    data: {
+                        ip_address: single_ip,
+                        project_id: project_id,
+                        csrfmiddlewaretoken: csrf
+                    }
+                });
+            });
+        }
+
+        if ($('[name="opt_vulners"]').is(':checked')) {
+            opt = true;
+            ips.forEach(function (single_ip) {
+                $.ajax({
+                    type: 'POST',
+                    url: '{% url "tools:nmap_vulners_scan" %}',
+                    data: {
+                        ip_address: single_ip,
+                        project_id: project_id,
+                        csrfmiddlewaretoken: csrf
+                    }
+                });
+            });
+        }
+
+        if ($('[name="opt_openvas"]').is(':checked')) {
+            opt = true;
+            ips.forEach(function (single_ip) {
+                $.ajax({
+                    type: 'POST',
+                    url: '{% url "networkscanners:launch_scan" %}',
+                    data: {
+                        ip_address: single_ip,
+                        project_id: project_id,
+                        csrfmiddlewaretoken: csrf
+                    }
+                });
+            });
+        }
+
+        if (opt) {
+            $('#status').text('Scan launched.').css({ 'color': '#5bb75b', 'margin-left': '200px' });
+            setTimeout(function () { location.reload(); }, 5000);
+        } else {
+            $('#status').text("The scan can't launch: no scanner selected.").css({ 'color': '#b94a48', 'margin-left': '200px' });
+        }
+    });
 </script>
+
 {% endblock %}
