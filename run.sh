@@ -39,5 +39,4 @@ exec gunicorn \
     --worker-class gthread \
     --workers 1 \
     --threads 10 \
-    --timeout 1800 \
-    --control /home/kali/Downloads/VAPT_Scanner/gunicorn.ctl
+    --timeout 1800
