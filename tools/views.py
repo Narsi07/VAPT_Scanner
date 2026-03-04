@@ -43,31 +43,30 @@ all_nmap = ""
 
 def _run_sslscan(scan_url, scan_id, project, user, organization):
     """Run sslscan in a background thread and save the output."""
+    from tools.models import SslscanResultDb
     try:
-        from tools.models import SslscanResultDb
-        output = subprocess.check_output(
+        raw = subprocess.check_output(
             ["sslscan", "--no-colour", scan_url],
             timeout=120,
             stderr=subprocess.STDOUT,
         )
+        # Decode bytes → readable text
+        output = raw.decode("utf-8", errors="replace")
         SslscanResultDb.objects.filter(scan_id=scan_id).update(
             sslscan_output=output
         )
         notify.send(user, recipient=user, verb="SSLScan Completed: %s" % scan_url)
     except FileNotFoundError:
-        from tools.models import SslscanResultDb
         SslscanResultDb.objects.filter(scan_id=scan_id).update(
-            sslscan_output=b"[ERROR] sslscan is not installed. Run: sudo apt install sslscan"
+            sslscan_output="[ERROR] sslscan is not installed. Run: sudo apt install sslscan"
         )
     except subprocess.TimeoutExpired:
-        from tools.models import SslscanResultDb
         SslscanResultDb.objects.filter(scan_id=scan_id).update(
-            sslscan_output=b"[ERROR] sslscan timed out after 120 seconds"
+            sslscan_output="[ERROR] sslscan timed out after 120 seconds"
         )
     except Exception as e:
-        from tools.models import SslscanResultDb
         SslscanResultDb.objects.filter(scan_id=scan_id).update(
-            sslscan_output=("[ERROR] " + str(e)).encode()
+            sslscan_output="[ERROR] " + str(e)
         )
         print("[VAPT] SSLScan error:", e)
 

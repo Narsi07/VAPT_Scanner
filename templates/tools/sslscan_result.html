@@ -2,38 +2,33 @@
 
 {% block body %}
 {% for data in scan_result %}
-
-        <div class="row">
-            <div class="col-md-12">
-                <h1>{{ data.scan_url }}</h1>
-                <br>
-                <div class="card">
-                    <div class="accordion" id="accordionExample">
-                        <div class="card m-b-0">
-                            <div class="card-header" id="headingOne">
-                                <h5 class="mb-0">
-                                    <a data-toggle="collapse" data-target="#collapseOne" aria-expanded="true"
-                                       aria-controls="collapseOne">
-                                        <i class="m-r-5 fa fa-chevron-down" aria-hidden="true"></i>
-                                        <h5>SSLScan :</h5>
-                                    </a>
-                                </h5>
-                            </div>
-                            <div id="collapseOne" class="collapse show" aria-labelledby="headingOne"
-                                 data-parent="#accordionExample">
-                                <div class="card-body">
-                                    <pre> {{ data.sslscan_output }} </pre>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header d-flex align-items-center">
+                <h5 class="mb-0"><i class="fas fa-lock mr-2 text-primary"></i>SSLScan Result — <strong>{{ data.scan_url
+                        }}</strong></h5>
+                {% if data.sslscan_output == "[Scanning...]" or not data.sslscan_output %}
+                <span class="badge badge-warning ml-3">Scanning...</span>
+                {% elif data.sslscan_output|slice:":7" == "[ERROR]" %}
+                <span class="badge badge-danger ml-3">Failed</span>
+                {% else %}
+                <span class="badge badge-success ml-3">Completed</span>
+                {% endif %}
+            </div>
+            <div class="card-body p-0">
+                <pre class="m-0 p-3" style="background:#1e1e1e;color:#d4d4d4;font-size:13px;
+                     border-radius:0 0 4px 4px;white-space:pre-wrap;word-break:break-word;
+                     max-height:600px;overflow-y:auto;">{{ data.sslscan_output }}</pre>
             </div>
         </div>
-
+    </div>
+</div>
+{% empty %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="alert alert-warning">No SSL scan result found.</div>
+    </div>
+</div>
 {% endfor %}
-
-
-
-
 {% endblock %}

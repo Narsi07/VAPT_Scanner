@@ -356,7 +356,7 @@ def _bandit_color(sev):
     return mapping.get(sev, "info")
 
 
-def _run_bandit_scan(scan_path, project_id, scan_id, user, organization):
+def _run_bandit_scan(scan_path, project, scan_id, user, organization):
     """Run bandit in a background thread and save results."""
     date_time = datetime.now()
     try:
@@ -385,7 +385,7 @@ def _run_bandit_scan(scan_path, project_id, scan_id, user, organization):
             StaticScanResultsDb(
                 vuln_id=uuid.uuid4(),
                 scan_id=scan_id,
-                project_id=project_id,
+                project=project,
                 title=title,
                 severity=sev,
                 severity_color=sev_color,
@@ -444,6 +444,15 @@ class BanditScanLaunch(APIView):
         scan_path = request.POST.get("scan_path", "").strip()
         project_id = request.POST.get("project_id", None)
 
+        # Resolve UUID → ProjectDb object to avoid FK int/UUID mismatch
+        project = None
+        if project_id:
+            try:
+                from projects.models import ProjectDb
+                project = ProjectDb.objects.get(uu_id=project_id)
+            except Exception:
+                project = None
+
         if not scan_path or not os.path.exists(scan_path):
             notify.send(user, recipient=user, verb="Bandit: invalid or missing scan path")
             return HttpResponseRedirect(reverse("staticscanners:list_scans"))
@@ -453,7 +462,7 @@ class BanditScanLaunch(APIView):
 
         StaticScansDb(
             scan_id=scan_id,
-            project_id=project_id,
+            project=project,
             project_name=scan_path,
             date_time=date_time,
             scanner="Bandit",
@@ -464,7 +473,7 @@ class BanditScanLaunch(APIView):
 
         thread = threading.Thread(
             target=_run_bandit_scan,
-            args=(scan_path, project_id, scan_id, user, request.user.organization)
+            args=(scan_path, project, scan_id, user, request.user.organization)
         )
         thread.daemon = True
         thread.start()
@@ -486,7 +495,7 @@ def _semgrep_color(sev):
     return mapping.get(sev, "info")
 
 
-def _run_semgrep_scan(scan_path, project_id, scan_id, user, organization):
+def _run_semgrep_scan(scan_path, project, scan_id, user, organization):
     """Run semgrep in a background thread and save results."""
     date_time = datetime.now()
     try:
@@ -517,7 +526,7 @@ def _run_semgrep_scan(scan_path, project_id, scan_id, user, organization):
             StaticScanResultsDb(
                 vuln_id=uuid.uuid4(),
                 scan_id=scan_id,
-                project_id=project_id,
+                project=project,
                 title=title,
                 severity=sev,
                 severity_color=sev_color,
@@ -576,6 +585,15 @@ class SemgrepScanLaunch(APIView):
         scan_path = request.POST.get("scan_path", "").strip()
         project_id = request.POST.get("project_id", None)
 
+        # Resolve UUID → ProjectDb object to avoid FK int/UUID mismatch
+        project = None
+        if project_id:
+            try:
+                from projects.models import ProjectDb
+                project = ProjectDb.objects.get(uu_id=project_id)
+            except Exception:
+                project = None
+
         if not scan_path or not os.path.exists(scan_path):
             notify.send(user, recipient=user, verb="Semgrep: invalid or missing scan path")
             return HttpResponseRedirect(reverse("staticscanners:list_scans"))
@@ -585,7 +603,7 @@ class SemgrepScanLaunch(APIView):
 
         StaticScansDb(
             scan_id=scan_id,
-            project_id=project_id,
+            project=project,
             project_name=scan_path,
             date_time=date_time,
             scanner="Semgrep",
@@ -596,7 +614,7 @@ class SemgrepScanLaunch(APIView):
 
         thread = threading.Thread(
             target=_run_semgrep_scan,
-            args=(scan_path, project_id, scan_id, user, request.user.organization)
+            args=(scan_path, project, scan_id, user, request.user.organization)
         )
         thread.daemon = True
         thread.start()

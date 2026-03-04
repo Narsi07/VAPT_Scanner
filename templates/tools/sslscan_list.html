@@ -59,40 +59,48 @@
                         <table id="data_table" class="table table-bordered data-table">
                             <thead>
                                 <tr>
-                                    <!--<th><p><label><input type="checkbox" id="checkAll"/></label></p></th>-->
                                     <th><label class="customcheckbox m-b-20">
                                             <input type="checkbox" id="mainCheckbox">
                                             <span class="checkmark"></span>
                                         </label></th>
                                     <th>URL</th>
+                                    <th>Status</th>
                                     <th>Action</th>
                                 </tr>
                             </thead>
-                            <tbody>{% for data in all_sslscan %}
-                                <tr data-target="#">
+                            <tbody>
+                                {% for data in all_sslscan %}
+                                <tr>
                                     <td>
-                                        <form>
-                                            <label class="customcheckbox">
-                                                <input type="checkbox" class="listCheckbox" value="{{data.scan_ip}}"
-                                                    name="del_scan_id" onClick="reload">
-                                                <span class="checkmark"></span>
-                                            </label>
-                                        </form>
+                                        <label class="customcheckbox">
+                                            <input type="checkbox" class="listCheckbox" value="{{ data.scan_id }}"
+                                                name="del_scan_id">
+                                            <span class="checkmark"></span>
+                                        </label>
                                     </td>
-                                    <td><a href="/tools/sslscan_result/?scan_id={{data.scan_id}}">{{ data.scan_url
+                                    <td>
+                                        <a href="/tools/sslscan_result/?scan_id={{ data.scan_id }}">{{ data.scan_url
                                             }}</a>
                                     </td>
                                     <td>
+                                        {% if data.sslscan_output == "[Scanning...]" or not data.sslscan_output %}
+                                        <span class="badge badge-warning">Scanning...</span>
+                                        {% elif data.sslscan_output|slice:":7" == "[ERROR]" %}
+                                        <span class="badge badge-danger">Failed</span>
+                                        {% else %}
+                                        <span class="badge badge-success">Completed</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
                                         <form action="{% url 'tools:sslscan_delete' %}" method="post"
-                                            class="forms-sample">
-
+                                            class="forms-sample d-inline">
                                             {% csrf_token %}
-                                            <input type="hidden" name="scan_id" value="{{data.scan_id}}" />
-                                            <button class="btn btn-danger"><i class="fas fa-times"></i></button>
+                                            <input type="hidden" name="scan_id" value="{{ data.scan_id }}" />
+                                            <button class="btn btn-danger btn-sm"><i class="fas fa-trash"></i></button>
                                         </form>
                                     </td>
-                                    {% endfor %}
                                 </tr>
+                                {% endfor %}
                             </tbody>
                         </table>
                     </div>
