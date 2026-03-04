@@ -7,6 +7,7 @@ import codecs
 import hashlib
 import os
 import subprocess
+import threading
 import uuid
 from datetime import datetime
 
@@ -36,6 +37,121 @@ scan_result = ""
 all_nmap = ""
 
 
+# ─────────────────────────────────────────────────────────────────────────────
+# BACKGROUND RUNNER HELPERS
+# ─────────────────────────────────────────────────────────────────────────────
+
+def _run_sslscan(scan_url, scan_id, project, user, organization):
+    """Run sslscan in a background thread and save the output."""
+    try:
+        from tools.models import SslscanResultDb
+        output = subprocess.check_output(
+            ["sslscan", "--no-colour", scan_url],
+            timeout=120,
+            stderr=subprocess.STDOUT,
+        )
+        SslscanResultDb.objects.filter(scan_id=scan_id).update(
+            sslscan_output=output
+        )
+        notify.send(user, recipient=user, verb="SSLScan Completed: %s" % scan_url)
+    except FileNotFoundError:
+        from tools.models import SslscanResultDb
+        SslscanResultDb.objects.filter(scan_id=scan_id).update(
+            sslscan_output=b"[ERROR] sslscan is not installed. Run: sudo apt install sslscan"
+        )
+    except subprocess.TimeoutExpired:
+        from tools.models import SslscanResultDb
+        SslscanResultDb.objects.filter(scan_id=scan_id).update(
+            sslscan_output=b"[ERROR] sslscan timed out after 120 seconds"
+        )
+    except Exception as e:
+        from tools.models import SslscanResultDb
+        SslscanResultDb.objects.filter(scan_id=scan_id).update(
+            sslscan_output=("[ERROR] " + str(e)).encode()
+        )
+        print("[VAPT] SSLScan error:", e)
+
+
+def _run_nikto(scan_url, scan_id, nikto_res_path, project_id, user, organization):
+    """Run nikto in a background thread, parse results and save."""
+    from tools.models import NiktoResultDb
+    nikto_launched = False
+    for nikto_cmd in ["nikto", "nikto.pl"]:
+        try:
+            print("[VAPT] Running: {} -h {}".format(nikto_cmd, scan_url))
+            subprocess.check_output(
+                [
+                    nikto_cmd, "-h", scan_url,
+                    "-o", nikto_res_path,
+                    "-Format", "htm",
+                    "-Tuning", "123bde",
+                ],
+                timeout=600,
+                stderr=subprocess.STDOUT,
+            )
+            nikto_launched = True
+            break
+        except FileNotFoundError:
+            print("[VAPT] {} not found, trying fallback...".format(nikto_cmd))
+        except subprocess.TimeoutExpired:
+            print("[VAPT] Nikto scan timed out")
+            break
+        except Exception as e:
+            print("[VAPT] Nikto error: {}".format(e))
+
+    if nikto_launched and os.path.isfile(nikto_res_path):
+        try:
+            f = codecs.open(nikto_res_path, "r")
+            data = f.read()
+            nikto_html_parser(data, project_id, scan_id)
+            notify.send(user, recipient=user, verb="Nikto Scan Completed: %s" % scan_url)
+            NiktoResultDb.objects.filter(scan_id=scan_id, organization=organization).update(
+                nikto_status="Scan Completed"
+            )
+        except Exception as e:
+            print("[VAPT] Nikto parse error: {}".format(e))
+            NiktoResultDb.objects.filter(scan_id=scan_id, organization=organization).update(
+                nikto_status="Parse Failed"
+            )
+    else:
+        NiktoResultDb.objects.filter(scan_id=scan_id, organization=organization).update(
+            nikto_status="Scan Failed — nikto not installed?"
+        )
+
+
+def _run_nmap(ip_address, scan_id, project_id, user, organization):
+    """Run nmap in a background thread, parse XML results and save."""
+    from tools.models import NmapScanDb
+    try:
+        print("[VAPT] Starting Nmap scan on", ip_address)
+        subprocess.check_output(
+            ["nmap", "-v", "-sV", "-Pn", "-p", "1-65535",
+             ip_address, "-oX", "output.xml"],
+            timeout=1800,
+            stderr=subprocess.STDOUT,
+        )
+        print("[VAPT] Nmap scan completed for", ip_address)
+    except FileNotFoundError:
+        print("[VAPT] nmap not found. Run: sudo apt install nmap")
+        NmapScanDb.objects.filter(scan_id=scan_id).update(scan_status="Failed: nmap not installed")
+        return
+    except subprocess.TimeoutExpired:
+        print("[VAPT] Nmap scan timed out for", ip_address)
+    except Exception as e:
+        print("[VAPT] Nmap error:", e)
+
+    try:
+        import defusedxml.ElementTree as ET2
+        tree = ET2.parse("output.xml")
+        root_xml = tree.getroot()
+        nmap_parser.xml_parser(root=root_xml, scan_id=scan_id, project_id=project_id)
+        notify.send(user, recipient=user, verb="Nmap scan completed: %s" % ip_address)
+        NmapScanDb.objects.filter(scan_id=scan_id).update(scan_status="Completed")
+    except Exception as e:
+        print("[VAPT] Nmap XML parse error:", e)
+        NmapScanDb.objects.filter(scan_id=scan_id).update(scan_status="Parse Failed")
+
+
 class SslScanList(APIView):
     renderer_classes = [TemplateHTMLRenderer]
     template_name = "tools/sslscan_list.html"
@@ -57,7 +173,6 @@ class SslScanLaunch(APIView):
     permission_classes = (IsAuthenticated, permissions.IsAnalyst)
 
     def post(self, request):
-        sslscan_output = ""
         user = request.user
         scan_url = request.POST.get("scan_url")
         project_id = request.POST.get("project_id")
@@ -75,30 +190,26 @@ class SslScanLaunch(APIView):
         scan_item = str(scan_url)
         value = scan_item.replace(" ", "")
         value_split = value.split(",")
-        split_length = value_split.__len__()
-        for i in range(0, split_length):
+        for scans_url in value_split:
             scan_id = uuid.uuid4()
-            scans_url = value_split.__getitem__(i)
-
-            try:
-                sslscan_output = subprocess.check_output(
-                    ["sslscan", "--no-colour", scans_url]
-                )
-                notify.send(user, recipient=user, verb="SSLScan Completed")
-
-            except Exception as e:
-                print(e)
-
-            dump_scans = SslscanResultDb(
+            # Save the record immediately with empty output — background will fill it in
+            SslscanResultDb(
                 scan_url=scans_url,
                 scan_id=scan_id,
                 project=project,
-                sslscan_output=sslscan_output,
+                sslscan_output=b"[Scanning...]",
                 organization=request.user.organization,
+            ).save()
+            # Launch background thread
+            t = threading.Thread(
+                target=_run_sslscan,
+                args=(scans_url, scan_id, project, user, request.user.organization),
+                daemon=True
             )
+            t.start()
 
-            dump_scans.save()
-            return HttpResponseRedirect(reverse("tools:sslscan"))
+        notify.send(user, recipient=user, verb="SSLScan started for: %s" % scan_url)
+        return HttpResponseRedirect(reverse("tools:sslscan"))
 
 
 class SslScanResult(APIView):
@@ -181,77 +292,29 @@ class NiktoScanLaunch(APIView):
         scan_item = str(scan_url)
         value = scan_item.replace(" ", "")
         value_split = value.split(",")
-        split_length = value_split.__len__()
-        for i in range(0, split_length):
+        for scans_url in value_split:
             date_time = datetime.now()
             scan_id = uuid.uuid4()
-            scans_url = value_split.__getitem__(i)
+            nikto_res_path = os.path.join(os.getcwd(), "nikto_result", str(scan_id) + ".html")
+            os.makedirs(os.path.dirname(nikto_res_path), exist_ok=True)
 
-            nikto_res_path = os.getcwd() + "/nikto_result/" + str(scan_id) + ".html"
-            # WSL-compatible path: convert Windows path to Linux path for WSL
-            nikto_wsl_path = "/mnt/" + nikto_res_path.replace("\\", "/").replace(":", "").lower()
-
-            dump_scans = NiktoResultDb(
+            NiktoResultDb(
                 scan_url=scans_url,
                 scan_id=scan_id,
                 project=project,
                 date_time=date_time,
                 nikto_status="Scan Started",
                 organization=request.user.organization,
+            ).save()
+
+            t = threading.Thread(
+                target=_run_nikto,
+                args=(scans_url, scan_id, nikto_res_path, project_id, user, request.user.organization),
+                daemon=True
             )
+            t.start()
 
-            # Create output directory if it doesn't exist
-            os.makedirs(os.path.dirname(nikto_res_path), exist_ok=True)
-
-            dump_scans.save()
-            HttpResponseRedirect(reverse("tools:nikto"))
-
-            # Try native nikto (Kali Linux: sudo apt install nikto)
-            nikto_launched = False
-            for nikto_cmd in ["nikto", "nikto.pl"]:
-                try:
-                    print("[VAPT] Running: {} -h {}".format(nikto_cmd, scans_url))
-                    nikto_output = subprocess.check_output(
-                        [
-                            nikto_cmd,
-                            "-h",
-                            scans_url,
-                            "-o",
-                            nikto_res_path,
-                            "-Format",
-                            "htm",
-                            "-Tuning",
-                            "123bde",
-                        ],
-                        timeout=300,
-                        stderr=subprocess.STDOUT,
-                    )
-                    nikto_launched = True
-                    break
-                except FileNotFoundError:
-                    print("[VAPT] {} not found, trying fallback...".format(nikto_cmd))
-                except subprocess.TimeoutExpired:
-                    print("[VAPT] Nikto scan timed out")
-                    break
-                except Exception as e:
-                    print("[VAPT] Nikto error: {}".format(e))
-
-            if nikto_launched and os.path.isfile(nikto_res_path):
-                try:
-                    f = codecs.open(nikto_res_path, "r")
-                    data = f.read()
-                    nikto_html_parser(data, project_id, scan_id)
-                    notify.send(user, recipient=user, verb="Nikto Scan Completed")
-                    NiktoResultDb.objects.filter(
-                        scan_id=scan_id, organization=request.user.organization
-                    ).update(nikto_status="Scan Completed")
-                except Exception as e:
-                    print("[VAPT] Nikto parse error: {}".format(e))
-            else:
-                NiktoResultDb.objects.filter(
-                    scan_id=scan_id, organization=request.user.organization
-                ).update(nikto_status="Scan Failed — nikto not installed?")
-
+        notify.send(user, recipient=user, verb="Nikto scan started for: %s" % scan_url)
         return HttpResponseRedirect(reverse("tools:nikto"))
 
 
@@ -433,40 +496,27 @@ class Nmap(APIView):
 
         if not project_id:
             project_id = None
+
         scan_id = uuid.uuid4()
+        user = request.user
 
-        try:
-            print("Start Nmap scan")
-            subprocess.check_output(
-                [
-                    "nmap",
-                    "-v",
-                    "-sV",
-                    "-Pn",
-                    "-p",
-                    "1-65535",
-                    ip_address,
-                    "-oX",
-                    "output.xml",
-                ]
-            )
+        # Save an initial scan record immediately
+        NmapScanDb(
+            scan_id=scan_id,
+            scan_ip=ip_address,
+            organization=request.user.organization,
+            scan_status="Scan Started",
+        ).save()
 
-            print("Completed nmap scan")
+        # Launch in background so browser doesn't block
+        t = threading.Thread(
+            target=_run_nmap,
+            args=(ip_address, scan_id, project_id, user, request.user.organization),
+            daemon=True,
+        )
+        t.start()
 
-        except Exception as e:
-            print("Eerror in nmap scan:", e)
-
-        try:
-            tree = ET.parse("output.xml")
-            root_xml = tree.getroot()
-
-            nmap_parser.xml_parser(
-                root=root_xml, scan_id=scan_id, project_id=project_id
-            )
-
-        except Exception as e:
-            print("Error in xml parser:", e)
-
+        notify.send(user, recipient=user, verb="Nmap scan started for: %s" % ip_address)
         return HttpResponseRedirect("/tools/nmap_scan/")
 
 

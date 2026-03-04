@@ -6,7 +6,11 @@ from __future__ import unicode_literals
 
 def launch_hub(request):
     from django.shortcuts import render as _render
-    return _render(request, 'launch/static_scan.html')
+    from projects.models import ProjectDb
+    all_projects = ProjectDb.objects.filter(
+        organization=request.user.organization
+    ) if request.user.is_authenticated else []
+    return _render(request, 'launch/static_scan.html', {'all_projects': all_projects})
 
 
 import hashlib
@@ -450,10 +454,11 @@ class BanditScanLaunch(APIView):
         StaticScansDb(
             scan_id=scan_id,
             project_id=project_id,
-            scan_url=scan_path,
+            project_name=scan_path,
             date_time=date_time,
             scanner="Bandit",
             scan_status="Scanning",
+            scan_date=date_time.strftime("%Y-%m-%d"),
             organization=request.user.organization,
         ).save()
 
@@ -581,10 +586,11 @@ class SemgrepScanLaunch(APIView):
         StaticScansDb(
             scan_id=scan_id,
             project_id=project_id,
-            scan_url=scan_path,
+            project_name=scan_path,
             date_time=date_time,
             scanner="Semgrep",
             scan_status="Scanning",
+            scan_date=date_time.strftime("%Y-%m-%d"),
             organization=request.user.organization,
         ).save()
 
