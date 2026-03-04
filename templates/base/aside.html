@@ -70,65 +70,46 @@
                                         <i class="fas fa-minus"></i>
                                         <span class="hide-menu">Scan Results</span>
                                 </li>
+                                <!-- Web Scan Results -->
                                 <li class="sidebar-item">
-                                        <a class="sidebar-link has-arrow waves-effect waves-dark" href="#"
-                                                aria-expanded="false">
-                                                <i class="fas fa-chart-bar"></i>
-                                                <span class="hide-menu">View Results</span>
+                                        <a class="sidebar-link waves-effect waves-dark"
+                                                href="{% url 'webscanners:results_hub' %}">
+                                                <i class="fas fa-globe"></i>
+                                                <span class="hide-menu">Web Scan Results</span>
                                         </a>
-                                        <ul aria-expanded="false" class="collapse first-level">
-                                                <li class="sidebar-item">
-                                                        <a href="{% url 'webscanners:list_scans' %}"
-                                                                class="sidebar-link">
-                                                                <i class="fas fa-globe"></i>
-                                                                <span class="hide-menu">Web Scan Results</span>
-                                                        </a>
-                                                </li>
-                                                <li class="sidebar-item">
-                                                        <a href="{% url 'networkscanners:list_scans' %}"
-                                                                class="sidebar-link">
-                                                                <i class="fas fa-network-wired"></i>
-                                                                <span class="hide-menu">Network Results</span>
-                                                        </a>
-                                                </li>
-                                                <li class="sidebar-item">
-                                                        <a href="{% url 'staticscanners:list_scans' %}"
-                                                                class="sidebar-link">
-                                                                <i class="fas fa-code"></i>
-                                                                <span class="hide-menu">Code Analysis Results</span>
-                                                        </a>
-                                                </li>
-                                                <li class="sidebar-item">
-                                                        <a href="{% url 'tools:nmap_result' %}" class="sidebar-link">
-                                                                <i class="fas fa-list-alt"></i>
-                                                                <span class="hide-menu">Nmap Results</span>
-                                                        </a>
-                                                </li>
-                                                <li class="sidebar-item">
-                                                        <a href="{% url 'tools:niktoresult' %}" class="sidebar-link">
-                                                                <i class="fas fa-spider"></i>
-                                                                <span class="hide-menu">Nikto Results</span>
-                                                        </a>
-                                                </li>
-                                                <li class="sidebar-item">
-                                                        <a href="{% url 'tools:sslscanresult' %}" class="sidebar-link">
-                                                                <i class="fas fa-lock"></i>
-                                                                <span class="hide-menu">SSLScan Results</span>
-                                                        </a>
-                                                </li>
-                                                <li class="sidebar-item">
-                                                        <a href="{% url 'pentest:list_scan' %}" class="sidebar-link">
-                                                                <i class="fas fa-clipboard-check"></i>
-                                                                <span class="hide-menu">Pentest Activity</span>
-                                                        </a>
-                                                </li>
-                                                <li class="sidebar-item">
-                                                        <a href="{% url 'report_upload:upload' %}" class="sidebar-link">
-                                                                <i class="fas fa-file-upload"></i>
-                                                                <span class="hide-menu">Upload Report</span>
-                                                        </a>
-                                                </li>
-                                        </ul>
+                                </li>
+                                <!-- Network Results -->
+                                <li class="sidebar-item">
+                                        <a class="sidebar-link waves-effect waves-dark"
+                                                href="{% url 'networkscanners:results_hub' %}">
+                                                <i class="fas fa-network-wired"></i>
+                                                <span class="hide-menu">Network Results</span>
+                                        </a>
+                                </li>
+                                <!-- Static Analysis Results -->
+                                <li class="sidebar-item">
+                                        <a class="sidebar-link waves-effect waves-dark"
+                                                href="{% url 'staticscanners:list_scans' %}">
+                                                <i class="fas fa-code"></i>
+                                                <span class="hide-menu">Static Analysis Results</span>
+                                        </a>
+                                </li>
+                                <li class="my-2 mx-3 border-top"></li>
+                                <!-- Pentest Activity -->
+                                <li class="sidebar-item">
+                                        <a class="sidebar-link waves-effect waves-dark"
+                                                href="{% url 'pentest:list_scan' %}">
+                                                <i class="fas fa-clipboard-check"></i>
+                                                <span class="hide-menu">Pentest Activity</span>
+                                        </a>
+                                </li>
+                                <!-- Upload Report -->
+                                <li class="sidebar-item">
+                                        <a class="sidebar-link waves-effect waves-dark"
+                                                href="{% url 'report_upload:upload' %}">
+                                                <i class="fas fa-file-upload"></i>
+                                                <span class="hide-menu">Upload Report</span>
+                                        </a>
                                 </li>
 
                                 <li class="my-2 mx-3 border-top"></li>

@@ -1,0 +1,131 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+{% block body %}
+<style>
+    .scanner-toggle {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 24px;
+        flex-wrap: wrap;
+    }
+
+    .scanner-toggle .btn-toggle {
+        padding: 10px 28px;
+        border-radius: 30px;
+        font-weight: 600;
+        font-size: 15px;
+        border: 2px solid #4f6af0;
+        color: #4f6af0;
+        background: #fff;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .scanner-toggle .btn-toggle.active,
+    .scanner-toggle .btn-toggle:hover {
+        background: #4f6af0;
+        color: #fff;
+    }
+
+    .scanner-panel {
+        display: none;
+    }
+
+    .scanner-panel.active {
+        display: block;
+    }
+</style>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-body">
+                <h2 class="card-title mb-1"><i class="fas fa-globe mr-2"></i> Web Scan Results</h2>
+                <p class="text-muted mb-4">Select a scanner tab to see its scan results.</p>
+
+                <!-- Toggle Buttons -->
+                <div class="scanner-toggle">
+                    <button class="btn-toggle active" onclick="showPanel('zap', this)">
+                        <i class="fas fa-bolt mr-1"></i> ZAP Results
+                    </button>
+                    <button class="btn-toggle" onclick="showPanel('nikto', this)">
+                        <i class="fas fa-spider mr-1"></i> Nikto Results
+                    </button>
+                    <button class="btn-toggle" onclick="showPanel('ssl', this)">
+                        <i class="fas fa-lock mr-1"></i> SSLScan Results
+                    </button>
+                </div>
+
+                <!-- ZAP Panel -->
+                <div id="panel-zap" class="scanner-panel active">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="mb-0"><i class="fas fa-bolt mr-2 text-primary"></i> OWASP ZAP Scan Results
+                                </h5>
+                                <a href="{% url 'webscanners:index' %}" class="btn btn-sm btn-primary">
+                                    <i class="fas fa-rocket mr-1"></i> New ZAP Scan
+                                </a>
+                            </div>
+                            <p class="text-muted small">Active web application scan results from OWASP ZAP. Includes
+                                URL, status, vulnerability counts per severity.</p>
+                            <a href="{% url 'webscanners:list_scans' %}" class="btn btn-outline-primary">
+                                <i class="fas fa-external-link-alt mr-1"></i> Open Full ZAP Results Table
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Nikto Panel -->
+                <div id="panel-nikto" class="scanner-panel">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="mb-0"><i class="fas fa-spider mr-2 text-warning"></i> Nikto Scan Results</h5>
+                                <a href="{% url 'tools:nikto' %}" class="btn btn-sm btn-primary">
+                                    <i class="fas fa-rocket mr-1"></i> New Nikto Scan
+                                </a>
+                            </div>
+                            <p class="text-muted small">Web server scan results from Nikto. Includes detected issues,
+                                server info, and vulnerability checks.</p>
+                            <a href="{% url 'tools:niktoresult' %}" class="btn btn-outline-primary">
+                                <i class="fas fa-external-link-alt mr-1"></i> Open Full Nikto Results Table
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SSLScan Panel -->
+                <div id="panel-ssl" class="scanner-panel">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="mb-0"><i class="fas fa-lock mr-2 text-success"></i> SSLScan Results</h5>
+                                <a href="{% url 'tools:sslscan' %}" class="btn btn-sm btn-primary">
+                                    <i class="fas fa-rocket mr-1"></i> New SSLScan
+                                </a>
+                            </div>
+                            <p class="text-muted small">TLS/SSL security assessment results. Includes cipher suite
+                                analysis, protocol vulnerabilities, and certificate information.</p>
+                            <a href="{% url 'tools:sslscanresult' %}" class="btn btn-outline-primary">
+                                <i class="fas fa-external-link-alt mr-1"></i> Open Full SSLScan Results Table
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function showPanel(name, btn) {
+        document.querySelectorAll('.scanner-panel').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.btn-toggle').forEach(b => b.classList.remove('active'));
+        document.getElementById('panel-' + name).classList.add('active');
+        btn.classList.add('active');
+    }
+</script>
+{% endblock %}

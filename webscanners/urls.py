@@ -9,6 +9,8 @@ app_name = "webscanners"
 urlpatterns = [
     # Unified launch hub page
     path("launch/", web_views.launch_hub, name="launch_hub"),
+    # Unified results hub page
+    path("results/", web_views.results_hub, name="results_hub"),
     # Main web scanner index / ZAP launch — template uses 'webscanners:index'
     path("", web_views.Index.as_view(), name="index"),
     # Cookie management — template uses 'webscanners:cookie_add', 'webscanners:cookies_del'

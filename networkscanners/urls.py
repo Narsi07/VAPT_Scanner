@@ -9,6 +9,8 @@ app_name = "networkscanners"
 urlpatterns = [
     # Unified launch hub page
     path("launch/", views.launch_hub, name="launch_hub"),
+    # Unified results hub page
+    path("results/", views.results_hub, name="results_hub"),
     # OpenVAS scanning
     path("launch_scan/", views.OpenvasLaunchScan.as_view(), name="launch_scan"),
     path("openvas_setting/", views.OpenvasSetting.as_view(), name="openvas_setting"),

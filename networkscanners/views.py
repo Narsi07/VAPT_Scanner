@@ -39,6 +39,10 @@ except Exception:
 def launch_hub(request):
     return render(request, 'launch/network_scan.html')
 
+
+def results_hub(request):
+    return render(request, 'results/network_results.html')
+
 from networkscanners.models import (NetworkScanDb, NetworkScanResultsDb,
                                     TaskScheduleDb)
 from networkscanners.serializers import (NetworkScanDbSerializer,

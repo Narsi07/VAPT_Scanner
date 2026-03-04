@@ -36,6 +36,10 @@ def launch_hub(request):
     return render(request, 'launch/web_scan.html')
 
 
+def results_hub(request):
+    return render(request, 'results/web_results.html')
+
+
 class DeleteNotify(APIView):
     renderer_classes = [TemplateHTMLRenderer]
 
