@@ -81,11 +81,6 @@
                             <input name="optradio4" type="checkbox"><span>Nikto</span>
                         </label>
                     </div>
-                    <div class="checkbox inline checkbox-slider--b-flat checkbox-slider--b" style="width: 200px;">
-                        <label>
-                            <input name="optradio5" type="checkbox"><span>Arachni</span>
-                        </label>
-                    </div>
                 </div>
             </div>
         </div>
@@ -168,22 +163,6 @@
             $.ajax({
                 type: 'POST',
                 url: '{% url "tools:niktolaunch" %}',
-                data: {
-
-                    scan_url: $('#url').val(),
-                    project_id: $('#project_id').val(),
-                    csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val()
-                },
-                sucess: function () {
-
-                }
-            });
-        }
-        if ($('[name="optradio5"]').is(':checked')) {
-            opt = true;
-            $.ajax({
-                type: 'POST',
-                url: '{% url "arachniscanner:arachni_scan_launch" %}',
                 data: {
 
                     scan_url: $('#url').val(),

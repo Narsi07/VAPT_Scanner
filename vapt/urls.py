@@ -12,7 +12,6 @@ from django.urls import include, path
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    # Web Scanners (ZAP)
     path("webscanners/", include("webscanners.urls")),
     path("zapscanner/", include("webscanners.zapscanner.urls")),
     # Projects
@@ -27,6 +26,8 @@ urlpatterns = [
     path("pentest/", include("pentest.urls")),
     # Settings
     path("settings/", include("vaptsettings.urls")),
+    # API v1 (VAPT REST API)
+    path("archerysec/api/", include("vaptapi.urls")),
     # Auth
     path("archerysec/api/v1/auth/", include("authentication.urls")),
     path("auth/", include("authentication.urls")),

@@ -417,6 +417,18 @@ class BanditScanLaunch(APIView):
     template_name = "staticscanners/scans/list_scans.html"
     permission_classes = (IsAuthenticated, permissions.IsAnalyst)
 
+    def get(self, request):
+        """Render the Bandit scan list + launch form"""
+        from projects.models import ProjectDb
+        all_scans = StaticScansDb.objects.filter(organization=request.user.organization, scanner="Bandit")
+        all_projects = ProjectDb.objects.filter(organization=request.user.organization)
+        all_notify = Notification.objects.unread()
+        return render(
+            request,
+            "staticscanners/scans/list_scans.html",
+            {"all_scans": all_scans, "all_projects": all_projects, "message": all_notify, "scanner": "Bandit"},
+        )
+
     def post(self, request):
         user = request.user
         scan_path = request.POST.get("scan_path", "").strip()
@@ -535,6 +547,18 @@ class SemgrepScanLaunch(APIView):
     renderer_classes = [TemplateHTMLRenderer]
     template_name = "staticscanners/scans/list_scans.html"
     permission_classes = (IsAuthenticated, permissions.IsAnalyst)
+
+    def get(self, request):
+        """Render the Semgrep scan list + launch form"""
+        from projects.models import ProjectDb
+        all_scans = StaticScansDb.objects.filter(organization=request.user.organization, scanner="Semgrep")
+        all_projects = ProjectDb.objects.filter(organization=request.user.organization)
+        all_notify = Notification.objects.unread()
+        return render(
+            request,
+            "staticscanners/scans/list_scans.html",
+            {"all_scans": all_scans, "all_projects": all_projects, "message": all_notify, "scanner": "Semgrep"},
+        )
 
     def post(self, request):
         user = request.user

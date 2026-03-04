@@ -1,31 +1,29 @@
 # -*- coding: utf-8 -*-
 # VAPT Security Platform
+# Additional Security Tools (SSL Scan, Nikto, DNS Enumeration)
 
-from django.urls import include, path
-
+from django.urls import path
 from tools import views
+from tools.scanner_consolidated import (
+    NiktoScannerView,
+    SSLScannerView,
+    DnsEnumerationView
+)
 
 app_name = "tools"
 
 urlpatterns = [
-    path("sslscan/", views.SslScanList.as_view(), name="sslscan"),
-    path("sslscanlaunch/", views.SslScanLaunch.as_view(), name="sslscanlaunch"),
-    path("sslscan_result/", views.SslScanResult.as_view(), name="sslscan_result"),
-    path("sslcan_del/", views.SslScanDelete.as_view(), name="sslcan_del"),
-    # Nikto requests
-    path("nikto/", views.NiktoScanList.as_view(), name="nikto"),
-    path("niktolaunch/", views.NiktoScanLaunch.as_view(), name="niktolaunch"),
-    path("nikto_result/", views.NiktoScanResult.as_view(), name="nikto_result"),
-    path("nikto_scan_del/", views.NiktoScanDelete.as_view(), name="nikto_scan_del"),
-    path("nikto_result_vul/", views.NiktoResultVuln.as_view(), name="nikto_result_vul"),
-    path("nikto_vuln_del/", views.NiktoVulnDelete.as_view(), name="nikto_vuln_del"),
-    # nmap requests
-    path("nmap_scan/", views.NmapScan.as_view(), name="nmap_scan"),
+    # Consolidated Nikto Web Server Scanner
+    path("nikto/", NiktoScannerView.as_view(), name="nikto"),
+    
+    # Consolidated SSL/TLS Certificate Scanner
+    path("sslscan/", SSLScannerView.as_view(), name="sslscan"),
+    
+    # Consolidated DNS Enumeration Tool
+    path("dns_enum/", DnsEnumerationView.as_view(), name="dns_enum"),
+    
+    # Legacy endpoints for compatibility
     path("nmap/", views.Nmap.as_view(), name="nmap"),
-    path("nmap_result/", views.NmapResult.as_view(), name="nmap_result"),
-    path("nmap_scan_del/", views.NmapScanDelete.as_view(), name="nmap_scan_del"),
-    # Nmap_Vulners
-    path("nmap_vulners_scan/", views.nmap_vulners_scan, name="nmap_scan"),
+    path("nmap_scan/", views.NmapScan.as_view(), name="nmap_scan"),
     path("nmap_vulners/", views.nmap_vulners, name="nmap_vulners"),
-    path("nmap_vulners_port_list/", views.nmap_vulners_port, name="nmap_vulners_port"),
 ]

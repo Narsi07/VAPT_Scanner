@@ -1,0 +1,182 @@
+{% extends 'dashboard/base.html' %}
+
+{% block body %}
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="float-right">
+                    {% if user.is_superuser == True or user.role.id == 2 %}
+                    <div class="btn-group" role="group">
+                        <!-- Launch Bandit Scan -->
+                        <button type="button" class="btn btn-success btn-mini" data-toggle="modal"
+                            data-target="#banditScanModal">
+                            <i class="fas fa-bug"></i> Launch Bandit Scan
+                        </button>
+                        <!-- Launch Semgrep Scan -->
+                        <button type="button" class="btn btn-info btn-mini" data-toggle="modal"
+                            data-target="#semgrepScanModal">
+                            <i class="fas fa-code"></i> Launch Semgrep Scan
+                        </button>
+                        <button type="button" class="btn btn-danger btn-mini">Delete Selected</button>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="d-md-flex align-items-center">
+                    <h1 class="card-title">
+                        {% if scanner %}{{ scanner }}{% else %}Static Analysis{% endif %} Scans
+                    </h1>
+                </div>
+                <br>
+                <div class="row">
+                    <div class="table-responsive">
+                        <table id="data_table" class="table table-bordered data-table">
+                            <thead>
+                                <tr>
+                                    <th><label class="customcheckbox m-b-20">
+                                            <input type="checkbox" id="mainCheckbox">
+                                            <span class="checkmark"></span>
+                                        </label></th>
+                                    <th>Target Path</th>
+                                    <th>Status</th>
+                                    <th>Scanner</th>
+                                    <th>Date Time</th>
+                                    <th>Total</th>
+                                    <th>High</th>
+                                    <th>Medium</th>
+                                    <th>Low</th>
+                                    <th>Info</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for data in all_scans %}
+                                <tr>
+                                    <td>
+                                        <form>
+                                            <label class="customcheckbox">
+                                                <input type="checkbox" class="listCheckbox" value="{{ data.scan_id }}"
+                                                    name="del_scan_id" onClick="reload">
+                                                <span class="checkmark"></span>
+                                            </label>
+                                        </form>
+                                    </td>
+                                    <td>{{ data.scan_url }}</td>
+                                    <td>
+                                        <div
+                                            class="progress {% if data.scan_status == '100' %}{% else %}active progress-striped{% endif %}">
+                                            <div class="progress-bar progress-bar-striped" role="progressbar"
+                                                style="width: {% if data.scan_status == 'Scanning' %}50{% elif data.scan_status == '100' %}100{% else %}0{% endif %}%">
+                                            </div>
+                                        </div>
+                                        <small>{{ data.scan_status }}</small>
+                                    </td>
+                                    <td>{{ data.scanner }}</td>
+                                    <td>{{ data.date_time }}</td>
+                                    <td><span class="badge badge-pill badge-dark">{{ data.total_vul }}</span></td>
+                                    <td><span class="badge badge-pill badge-danger">{{ data.high_vul }}</span></td>
+                                    <td><span class="badge badge-pill badge-warning">{{ data.medium_vul }}</span></td>
+                                    <td><span class="badge badge-pill badge-info">{{ data.low_vul }}</span></td>
+                                    <td><span class="badge badge-pill badge-secondary">{{ data.info_vul }}</span></td>
+                                    <td>
+                                        <a href="{% url 'staticscanners:list_vuln_info' %}?scan_id={{ data.scan_id }}"
+                                            class="btn btn-xs btn-primary">
+                                            <i class="fas fa-eye"></i> View
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="11" class="text-center">
+                                        No scans found. Launch a Bandit or Semgrep scan to get started.
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bandit Scan Launch Modal -->
+<div class="modal fade" id="banditScanModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-bug"></i> Launch Bandit SAST Scan</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form method="POST" action="{% url 'staticscanners:bandit_scan' %}">{% csrf_token %}
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Project</label>
+                        <select name="project_id" class="form-control" required>
+                            {% for proj in all_projects %}
+                            <option value="{{ proj.uu_id }}">{{ proj.project_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Path to Python Source</label>
+                        <input type="text" name="scan_path" class="form-control"
+                            placeholder="/path/to/your/python/project" required>
+                        <small class="form-text text-muted">Absolute path to directory or file on the server.</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-play"></i> Start Scan
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Semgrep Scan Launch Modal -->
+<div class="modal fade" id="semgrepScanModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-code"></i> Launch Semgrep SAST Scan</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form method="POST" action="{% url 'staticscanners:semgrep_scan' %}">{% csrf_token %}
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Project</label>
+                        <select name="project_id" class="form-control" required>
+                            {% for proj in all_projects %}
+                            <option value="{{ proj.uu_id }}">{{ proj.project_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Path to Source Code</label>
+                        <input type="text" name="scan_path" class="form-control" placeholder="/path/to/your/source/code"
+                            required>
+                        <small class="form-text text-muted">Absolute path to directory on the server. Semgrep supports
+                            most languages.</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-info">
+                        <i class="fas fa-play"></i> Start Scan
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

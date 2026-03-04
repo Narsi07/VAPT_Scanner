@@ -1,33 +1,32 @@
 # -*- coding: utf-8 -*-
 # VAPT Security Platform
+# Web Application Security Scanners
 
 from django.urls import include, path
-
 from webscanners import views, web_views
+from webscanners.scanner_consolidated import ZapScannerView
 
 app_name = "webscanners"
 
 urlpatterns = [
     path("", web_views.Index.as_view(), name="index"),
-    path(
-        "cookie_add/",
-        web_views.AddCookies.as_view(),
-        name="cookie_add",
-    ),
+    
+    # Consolidated Scanners - Single endpoint for scan launch + result display
+    
+    # OWASP ZAP Web Application Scanner
+    path("zap/", ZapScannerView.as_view(), name="zap_scan"),
+    
+    # Legacy cookie and scheduling management
+    path("cookie_add/", web_views.AddCookies.as_view(), name="cookie_add"),
     path("web_task_launch/", web_views.WebTaskLaunch.as_view(), name="web_task_launch"),
-    path(
-        "web_scan_schedule/",
-        web_views.WebScanSchedule.as_view(),
-        name="web_scan_schedule",
-    ),
-    path(
-        "del_web_scan_schedule/",
-        web_views.WebScanScheduleDelete.as_view(),
-        name="del_web_scan_schedule",
-    ),
+    path("web_scan_schedule/", web_views.WebScanSchedule.as_view(), name="web_scan_schedule"),
+    path("del_web_scan_schedule/", web_views.WebScanScheduleDelete.as_view(), name="del_web_scan_schedule"),
+    
+    # Notifications
     path("del_notify/", web_views.DeleteNotify.as_view(), name="del_notify"),
     path("del_all_notify/", web_views.DeleteAllNotify.as_view(), name="del_all_notify"),
-    # Dynamic scans
+    
+    # Scan management
     path("list_vuln/", views.WebScanVulnList.as_view(), name="list_vuln"),
     path("list_scans/", views.WebScanList.as_view(), name="list_scans"),
     path("list_vuln_info/", views.WebScanVulnInfo.as_view(), name="list_vuln_info"),

@@ -22,9 +22,6 @@ from user_management.views import (InviteUserAPIView, Profile, Roles,
                                    UserActivateAPIView, UserRoles, Users,
                                    UsersEdit, UsersList, ResetUserPasswordAPIView,
                                    UserPasswordResetAPIView)
-from webscanners.arachniscanner.views import (ArachniScan, ArachniSetting,
-                                              ArachniSettingUpdate)
-from webscanners.burpscanner.views import BurpScanLaunch, BurpSetting
 from webscanners.views import WebScanList, WebScanVulnInfo
 from webscanners.zapscanner.views import ZapScan, ZapSetting, ZapSettingUpdate
 
@@ -111,13 +108,6 @@ urlpatterns = [
     path("v1/zap-scan/", ZapScan.as_view()),
     path("v1/zap-settings/", ZapSetting.as_view()),
     path("v1/zap-settings-update/", ZapSettingUpdate.as_view()),
-    # Burp Scan
-    path("v1/burp-settings/", BurpSetting.as_view()),
-    path("v1/burp-scans/", BurpScanLaunch.as_view()),
-    # Arachni Scan
-    path("v1/arachni-scans/", ArachniScan.as_view()),
-    path("v1/arachni-settings/", ArachniSetting.as_view()),
-    path("v1/arachni-setting-update/", ArachniSettingUpdate.as_view()),
     # Openvas Scan
     path("v1/openvas-scans/", OpenvasLaunchScan.as_view()),
     path("v1/openvas-settings/", OpenvasSetting.as_view()),
