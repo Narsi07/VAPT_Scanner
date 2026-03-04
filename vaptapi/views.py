@@ -30,8 +30,7 @@ from rest_framework.views import APIView
 from vaptapi.models import OrgAPIKey
 from vaptapi.serializers import (GenericScanResultsDbSerializer,
                                     JiraLinkSerializer, OrgAPIKeySerializer)
-from cicd.models import CicdDb
-from cicd.serializers import GetPoliciesSerializers
+
 try:
     from cloudscanners.models import CloudScansDb, CloudScansResultsDb
     CLOUD_AVAILABLE = True
@@ -39,7 +38,13 @@ except ImportError:
     CloudScansDb = None
     CloudScansResultsDb = None
     CLOUD_AVAILABLE = False
-from compliance.models import DockleScanDb, InspecScanDb
+try:
+    from compliance.models import DockleScanDb, InspecScanDb
+    COMPLIANCE_AVAILABLE = True
+except ImportError:
+    DockleScanDb = None
+    InspecScanDb = None
+    COMPLIANCE_AVAILABLE = False
 from jiraticketing.models import jirasetting
 from networkscanners.models import NetworkScanDb, NetworkScanResultsDb
 from projects.models import MonthDb, ProjectDb
@@ -375,6 +380,8 @@ class UploadScanResult(APIView):
                 project_id=project_id,
             )
         elif db_type == "InspecScan":
+            if not COMPLIANCE_AVAILABLE:
+                return Response({"error": "Compliance module not available"}, status=status.HTTP_501_NOT_IMPLEMENTED)
             custom_return = True
             scan_dump = InspecScanDb(
                 project_name=scan_url,
@@ -383,6 +390,8 @@ class UploadScanResult(APIView):
                 scan_status=scan_status,
             )
         elif db_type == "DockleScan":
+            if not COMPLIANCE_AVAILABLE:
+                return Response({"error": "Compliance module not available"}, status=status.HTTP_501_NOT_IMPLEMENTED)
             custom_return = True
             scan_dump = DockleScanDb(
                 scan_id=scan_id,
@@ -485,27 +494,13 @@ class DisableAPIKey(APIView):
 
 
 class GetCicdPolicies(APIView):
-    parser_classes = (MultiPartParser,)
     permission_classes = (BasePermission, permissions.VerifyAPIKey)
 
     def get(self, request, uu_id=None):
-        if uu_id is None:
-            get_cicd_policies = CicdDb.objects.filter(
-                organization=request.user.organization
-            )
-            serialized_data = GetPoliciesSerializers(get_cicd_policies, many=True)
-        else:
-            try:
-                get_cicd_policies = CicdDb.objects.filter(
-                    cicd_id=uu_id, organization=request.user.organization
-                )
-                serialized_data = GetPoliciesSerializers(get_cicd_policies, many=False)
-            except CicdDb.DoesNotExist:
-                return Response(
-                    {"message": "CI/CD Id Doesn't Exist"},
-                    status=status.HTTP_404_NOT_FOUND,
-                )
-        return Response(serialized_data.data, status=status.HTTP_200_OK)
+        return Response(
+            {"message": "CI/CD module is not included in this system."},
+            status=status.HTTP_404_NOT_FOUND,
+        )
 
 
 class DeleteAPIKey(APIView):
