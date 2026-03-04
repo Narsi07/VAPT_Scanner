@@ -50,7 +50,7 @@
             {% endif %}
 
             <!-- Login Form -->
-            <form id="loginform" action="{% url 'auth' %}" method="POST">
+            <form id="loginform" action="/auth/auth/" method="POST">
                 {% csrf_token %}
 
                 <div class="form-group">
