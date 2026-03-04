@@ -26,7 +26,13 @@ sudo -u postgres psql -tc "SELECT 1 FROM pg_database WHERE datname='vaptdb';" | 
 
 sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE vaptdb TO vaptuser;" 2>/dev/null
 
-# ── 3. Run Django migrations ──────────────────────────────────────────────────
+# ── 3. Ensure dependencies are installed ─────────────────────────────────────
+if ! python -c "import whitenoise" 2>/dev/null; then
+    echo "[VAPT] Installing missing Python dependencies..."
+    pip install -q -r requirements.txt
+fi
+
+# ── 4. Run Django migrations ──────────────────────────────────────────────────
 echo "[VAPT] Running database migrations..."
 python manage.py migrate --run-syncdb 2>&1 | tail -5
 
