@@ -24,4 +24,8 @@ urlpatterns = [
     path("nmap_scan/", views.NmapScan.as_view(), name="nmap_scan"),
     path("nmap_result/", views.NmapResult.as_view(), name="nmap_result"),
     path("nmap_scan_delete/", views.NmapScanDelete.as_view(), name="nmap_scan_delete"),
+    # Nmap Vulners
+    path("nmap_vulners/", views.nmap_vulners, name="nmap_vulners"),
+    path("nmap_vulners_port_list/", views.nmap_vulners_port, name="nmap_vulners_port_list"),
+    path("nmap_vulners_scan/", views.nmap_vulners_scan, name="nmap_vulners_scan"),
 ]
