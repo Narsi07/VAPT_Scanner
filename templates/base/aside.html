@@ -36,88 +36,31 @@
                                 </li>
 
 
-                                <!-- Web Scanning -->
+                                <!-- Web Scanning - flat link to toggle hub -->
                                 <li class="sidebar-item">
-                                        <a class="sidebar-link has-arrow waves-effect waves-dark" href="#"
-                                                aria-expanded="false">
+                                        <a class="sidebar-link waves-effect waves-dark"
+                                                href="{% url 'webscanners:launch_hub' %}">
                                                 <i class="fas fa-globe"></i>
                                                 <span class="hide-menu">Web Scanning</span>
                                         </a>
-                                        <ul aria-expanded="false" class="collapse first-level">
-                                                <li class="sidebar-item">
-                                                        <a href="{% url 'webscanners:index' %}" class="sidebar-link">
-                                                                <i class="fas fa-bolt"></i>
-                                                                <span class="hide-menu">OWASP ZAP</span>
-                                                        </a>
-                                                </li>
-                                                <li class="sidebar-item">
-                                                        <a href="{% url 'tools:nikto' %}" class="sidebar-link">
-                                                                <i class="fas fa-spider"></i>
-                                                                <span class="hide-menu">Nikto</span>
-                                                        </a>
-                                                </li>
-                                                <li class="sidebar-item">
-                                                        <a href="{% url 'tools:sslscan' %}" class="sidebar-link">
-                                                                <i class="fas fa-lock"></i>
-                                                                <span class="hide-menu">SSLScan</span>
-                                                        </a>
-                                                </li>
-                                        </ul>
                                 </li>
 
-                                <!-- Network Scanning -->
+                                <!-- Network Scanning - flat link to toggle hub -->
                                 <li class="sidebar-item">
-                                        <a class="sidebar-link has-arrow waves-effect waves-dark" href="#"
-                                                aria-expanded="false">
+                                        <a class="sidebar-link waves-effect waves-dark"
+                                                href="{% url 'networkscanners:launch_hub' %}">
                                                 <i class="fas fa-network-wired"></i>
                                                 <span class="hide-menu">Network Scanning</span>
                                         </a>
-                                        <ul aria-expanded="false" class="collapse first-level">
-                                                <li class="sidebar-item">
-                                                        <a href="{% url 'tools:nmap_scan' %}" class="sidebar-link">
-                                                                <i class="fas fa-search-location"></i>
-                                                                <span class="hide-menu">Nmap Port Scan</span>
-                                                        </a>
-                                                </li>
-                                                <li class="sidebar-item">
-                                                        <a href="{% url 'tools:nmap_vulners' %}" class="sidebar-link">
-                                                                <i class="fas fa-bug"></i>
-                                                                <span class="hide-menu">Nmap + Vulners</span>
-                                                        </a>
-                                                </li>
-                                                <li class="sidebar-item">
-                                                        <a href="{% url 'networkscanners:ip_scan' %}"
-                                                                class="sidebar-link">
-                                                                <i class="fas fa-shield-alt"></i>
-                                                                <span class="hide-menu">OpenVAS</span>
-                                                        </a>
-                                                </li>
-                                        </ul>
                                 </li>
 
-                                <!-- Static Analysis -->
+                                <!-- Static Analysis - flat link directly to bandit_scan page -->
                                 <li class="sidebar-item">
-                                        <a class="sidebar-link has-arrow waves-effect waves-dark" href="#"
-                                                aria-expanded="false">
+                                        <a class="sidebar-link waves-effect waves-dark"
+                                                href="{% url 'staticscanners:bandit_scan' %}">
                                                 <i class="fas fa-code"></i>
                                                 <span class="hide-menu">Static Analysis</span>
                                         </a>
-                                        <ul aria-expanded="false" class="collapse first-level">
-                                                <li class="sidebar-item">
-                                                        <a href="{% url 'staticscanners:bandit_scan' %}"
-                                                                class="sidebar-link">
-                                                                <i class="fas fa-exclamation-triangle"></i>
-                                                                <span class="hide-menu">Bandit</span>
-                                                        </a>
-                                                </li>
-                                                <li class="sidebar-item">
-                                                        <a href="{% url 'staticscanners:semgrep_scan' %}"
-                                                                class="sidebar-link">
-                                                                <i class="fas fa-search-dollar"></i>
-                                                                <span class="hide-menu">Semgrep</span>
-                                                        </a>
-                                                </li>
-                                        </ul>
                                 </li>
 
                                 <li class="my-2 mx-3 border-top"></li>
