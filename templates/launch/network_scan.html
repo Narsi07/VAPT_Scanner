@@ -95,7 +95,7 @@
         var project_id = $('#project_id').val();
         var csrf = $('input[name=csrfmiddlewaretoken]').val();
 
-        {% comment %}Loop through each IP if comma - separated, launch for each selected scanner{% endcomment %}
+        // Loop through each IP if comma - separated, launch for each selected scanner
         var ips = ip.split(',').map(function (s) { return s.trim(); }).filter(Boolean);
 
         if ($('[name="opt_nmap"]').is(':checked')) {
@@ -103,9 +103,9 @@
             ips.forEach(function (single_ip) {
                 $.ajax({
                     type: 'POST',
-                    url: '{% url "tools:nmap_scan" %}',
+                    url: '{% url "tools:nmap" %}',
                     data: {
-                        ip_address: single_ip,
+                        ip: single_ip,
                         project_id: project_id,
                         csrfmiddlewaretoken: csrf
                     }
@@ -118,9 +118,9 @@
             ips.forEach(function (single_ip) {
                 $.ajax({
                     type: 'POST',
-                    url: '{% url "tools:nmap_vulners_scan" %}',
+                    url: '{% url "tools:nmap_vulners" %}',
                     data: {
-                        ip_address: single_ip,
+                        ip: single_ip,
                         project_id: project_id,
                         csrfmiddlewaretoken: csrf
                     }
