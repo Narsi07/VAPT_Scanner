@@ -160,12 +160,15 @@ MESSAGE_TAGS = {
 }
 
 STRONGHOLD_PUBLIC_URLS = (
-    r"^/admin.*?$",  # Don't touch the admin pages
-    r"^/accounts/login/$",  # Avoid redirect loop
-    r"^/api.*?$",
+    r"^/admin.*?$",            # Django admin
+    r"^/accounts/login/$",     # Django default login (fallback)
+    r"^/auth/.*$",             # All auth routes: login, signup, reset, token
+    r"^/api.*?$",              # DRF API
+    r"^/archerysec/api.*?$",   # Legacy API namespace
     r"^/api/v1/activate/$",
     r"^/api/v1/forget-user-password/$",
-    r"^/o.*?$",
+    r"^/o.*?$",                # OAuth
+    r"^/static/.*$",           # Static files
 )
 
 LOGIN_URL = "/auth/login/"
