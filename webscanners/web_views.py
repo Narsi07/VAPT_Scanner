@@ -32,6 +32,10 @@ def error_404_view(request):
     return render(request, "error/404.html")
 
 
+def launch_hub(request):
+    return render(request, 'launch/web_scan.html')
+
+
 class DeleteNotify(APIView):
     renderer_classes = [TemplateHTMLRenderer]
 

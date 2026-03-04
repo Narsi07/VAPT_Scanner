@@ -3,6 +3,12 @@
 
 from __future__ import unicode_literals
 
+
+def launch_hub(request):
+    from django.shortcuts import render as _render
+    return _render(request, 'launch/static_scan.html')
+
+
 import hashlib
 import json
 import os

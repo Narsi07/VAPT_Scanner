@@ -34,6 +34,11 @@ try:
     from jiraticketing.models import jirasetting
 except Exception:
     jirasetting = None
+
+
+def launch_hub(request):
+    return render(request, 'launch/network_scan.html')
+
 from networkscanners.models import (NetworkScanDb, NetworkScanResultsDb,
                                     TaskScheduleDb)
 from networkscanners.serializers import (NetworkScanDbSerializer,
