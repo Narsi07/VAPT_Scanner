@@ -34,10 +34,6 @@
                             </div>
                         </div>
                         <a class="btn btn-primary" href="{% url 'jiraticketing:jira_setting' %}" role="button">Edit</a>
-                        <form method="POST" action="{% url 'vaptsettings:settings' %}">{% csrf_token %}
-                            <input type="hidden" name="setting_of" value="jira">
-                            <button type="submit" class="btn btn-pinterest float-right">Test Connection</button>
-                        </form>
                     </div>
                 </div>
             </div>
@@ -82,10 +78,6 @@
                             </div>
                         </div>
                         <a class="btn btn-primary" href="{% url 'zapscanner:zap_settings' %}" role="button">Edit</a>
-                        <form method="POST" action="{% url 'vaptsettings:settings' %}">{% csrf_token %}
-                            <input type="hidden" name="setting_of" value="zap">
-                            <button type="submit" class="btn btn-pinterest float-right">Test Connection</button>
-                        </form>
                     </div>
                 </div>
             </div>
@@ -137,10 +129,6 @@
                         </div>
                         <a class="btn btn-primary" href="{% url 'networkscanners:openvas_setting' %}"
                             role="button">Edit</a>
-                        <form method="POST" action="{% url 'vaptsettings:settings' %}">{% csrf_token %}
-                            <input type="hidden" name="setting_of" value="openvas">
-                            <button type="submit" class="btn btn-pinterest float-right">Test Connection</button>
-                        </form>
                     </div>
                 </div>
             </div>
@@ -189,83 +177,28 @@
         </div>
     </div>
 
-    <!-- Email Setting -->
-    <div class="col-12">
-        <div class="card">
-            <div class="card-body">
-                <div class="d-md-flex align-items-center">
-                    <h1 class="card-title">Email Setting</h1>
-                </div>
-                <br>
-                <div class="card">
-                    <div class="card-body">
-                        <div class="form-group row">
-                            <label class="col-sm-4 col-form-label">Email Subject</label>
-                            <div class="col-sm-6">
-                                <input type="text" readonly class="form-control-plaintext"
-                                    value="{% for data in all_email %}{{ data.subject }}{% endfor %}"
-                                    placeholder="Type Email Subject">
-                            </div>
-                        </div>
-                        <div class="form-group row">
-                            <label class="col-sm-4 col-form-label">From Email</label>
-                            <div class="col-sm-6">
-                                <input type="text" readonly class="form-control-plaintext"
-                                    value="{% for data in all_email %}{{ data.message }}{% endfor %}"
-                                    placeholder="Enter Email ID">
-                            </div>
-                        </div>
-                        <div class="form-group row">
-                            <label class="col-sm-4 col-form-label">To Email</label>
-                            <div class="col-sm-6">
-                                <input type="text" readonly class="form-control-plaintext"
-                                    value="{% for data in all_email %}{{ data.recipient_list }}{% endfor %}"
-                                    placeholder="Enter Email ID">
-                            </div>
-                        </div>
-                        <a class="btn btn-primary" href="{% url 'vaptsettings:email_setting' %}" role="button">Edit</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
 </div>
 
 {% if zap_info == False %}
-<script>
-    $(window).load(function () { toastr.error('ZAP Connection Not Found'); });
-</script>
+<script>$(window).load(function () { toastr.error('ZAP Connection Not Found'); });</script>
 {% endif %}
 {% if zap_info == True %}
-<script>
-    $(window).load(function () { toastr.success('ZAP Connection Found'); });
-</script>
+<script>$(window).load(function () { toastr.success('ZAP Connection Found'); });</script>
 {% endif %}
 {% if zap_info == 'Disabled' %}
-<script>
-    $(window).load(function () { toastr.warning('ZAP Connection Disabled'); });
-</script>
+<script>$(window).load(function () { toastr.warning('ZAP Connection Disabled'); });</script>
 {% endif %}
 {% if openvas_info == False %}
-<script>
-    $(window).load(function () { toastr.error('OpenVAS Connection Not Found'); });
-</script>
+<script>$(window).load(function () { toastr.error('OpenVAS Connection Not Found'); });</script>
 {% endif %}
 {% if openvas_info == True %}
-<script>
-    $(window).load(function () { toastr.success('OpenVAS Connection Found'); });
-</script>
+<script>$(window).load(function () { toastr.success('OpenVAS Connection Found'); });</script>
 {% endif %}
 {% if jira_info == False %}
-<script>
-    $(window).load(function () { toastr.error('Jira Connection Not Found'); });
-</script>
+<script>$(window).load(function () { toastr.error('Jira Connection Not Found'); });</script>
 {% endif %}
 {% if jira_info == True %}
-<script>
-    $(window).load(function () { toastr.success('Jira Connection Found'); });
-</script>
+<script>$(window).load(function () { toastr.success('Jira Connection Found'); });</script>
 {% endif %}
 
 {% endblock %}
