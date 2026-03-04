@@ -133,7 +133,6 @@ def _run_nmap(ip_address, scan_id, project_id, user, organization):
         print("[VAPT] Nmap scan completed for", ip_address)
     except FileNotFoundError:
         print("[VAPT] nmap not found. Run: sudo apt install nmap")
-        NmapScanDb.objects.filter(scan_id=scan_id).update(scan_status="Failed: nmap not installed")
         return
     except subprocess.TimeoutExpired:
         print("[VAPT] Nmap scan timed out for", ip_address)
@@ -146,10 +145,8 @@ def _run_nmap(ip_address, scan_id, project_id, user, organization):
         root_xml = tree.getroot()
         nmap_parser.xml_parser(root=root_xml, scan_id=scan_id, project_id=project_id)
         notify.send(user, recipient=user, verb="Nmap scan completed: %s" % ip_address)
-        NmapScanDb.objects.filter(scan_id=scan_id).update(scan_status="Completed")
     except Exception as e:
         print("[VAPT] Nmap XML parse error:", e)
-        NmapScanDb.objects.filter(scan_id=scan_id).update(scan_status="Parse Failed")
 
 
 class SslScanList(APIView):
@@ -505,7 +502,6 @@ class Nmap(APIView):
             scan_id=scan_id,
             scan_ip=ip_address,
             organization=request.user.organization,
-            scan_status="Scan Started",
         ).save()
 
         # Launch in background so browser doesn't block
