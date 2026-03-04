@@ -4,13 +4,13 @@ echo "[VAPT] Starting VAPT Scanner on Kali Linux..."
 
 # ── 1. Start PostgreSQL ───────────────────────────────────────────────────────
 echo "[VAPT] Checking PostgreSQL..."
-if ! pg_isready -q; then
+if ! sudo -u postgres pg_isready -q; then
     echo "[VAPT] Starting PostgreSQL service..."
     sudo service postgresql start
     sleep 3
 fi
 
-if ! pg_isready -q; then
+if ! sudo -u postgres pg_isready -q; then
     echo "[VAPT ERROR] PostgreSQL failed to start. Please run: sudo service postgresql start"
     exit 1
 fi
