@@ -1,0 +1,84 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+{% block body %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-body">
+                <h2 class="card-title"><i class="fas fa-network-wired mr-2"></i> Network Scanning</h2>
+                <p class="text-muted">Select a scanner, enter your target host or IP range, and launch the scan.</p>
+                <hr>
+                <div class="row mt-4">
+
+                    <!-- Nmap Port Scan Card -->
+                    <div class="col-md-4 mb-4">
+                        <div class="card h-100 border-0 shadow-sm">
+                            <div class="card-body text-center p-4">
+                                <img src="/static/tools/nmap.png" width="64" class="mb-3" alt="Nmap"
+                                    onerror="this.src='/static/tools/openvas.png'">
+                                <h4 class="card-title">Nmap Port Scan</h4>
+                                <p class="text-muted small">Network discovery and port scanning. Identifies open ports,
+                                    running services, and OS fingerprinting across single hosts or entire networks.</p>
+                                <span class="badge badge-info mb-3">Port Scanner</span>
+                                <br>
+                                <a href="{% url 'tools:nmap_scan' %}" class="btn btn-primary btn-block">
+                                    <i class="fas fa-rocket mr-1"></i> Launch Nmap Scan
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Nmap Vulners Card -->
+                    <div class="col-md-4 mb-4">
+                        <div class="card h-100 border-0 shadow-sm">
+                            <div class="card-body text-center p-4">
+                                <img src="/static/tools/nmap.png" width="64" class="mb-3" alt="Nmap Vulners"
+                                    onerror="this.src='/static/tools/openvas.png'">
+                                <h4 class="card-title">Nmap + Vulners</h4>
+                                <p class="text-muted small">Combines Nmap with the Vulners vulnerability database to map
+                                    detected services to known CVEs. Identifies exploitable vulnerabilities by version.
+                                </p>
+                                <span class="badge badge-danger mb-3">CVE Matcher</span>
+                                <br>
+                                <a href="{% url 'tools:nmap_vulners' %}" class="btn btn-primary btn-block">
+                                    <i class="fas fa-rocket mr-1"></i> Launch Nmap+Vulners
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- OpenVAS Card -->
+                    <div class="col-md-4 mb-4">
+                        <div class="card h-100 border-0 shadow-sm">
+                            <div class="card-body text-center p-4">
+                                <img src="/static/tools/openvas.png" width="64" class="mb-3" alt="OpenVAS">
+                                <h4 class="card-title">OpenVAS</h4>
+                                <p class="text-muted small">Full-featured network vulnerability scanner with 50,000+
+                                    tests. Deep infrastructure scanning for CVEs, misconfigurations, and compliance
+                                    issues.</p>
+                                <span class="badge badge-warning mb-3">Infra Scanner</span>
+                                <br>
+                                <a href="{% url 'networkscanners:ip_scan' %}" class="btn btn-primary btn-block">
+                                    <i class="fas fa-rocket mr-1"></i> Launch OpenVAS Scan
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Results quick-links -->
+                <hr>
+                <h5 class="text-muted">View Results</h5>
+                <a href="{% url 'tools:nmap_result' %}" class="btn btn-outline-secondary btn-sm mr-2">
+                    <i class="fas fa-list mr-1"></i> Nmap Results
+                </a>
+                <a href="{% url 'networkscanners:list_scans' %}" class="btn btn-outline-secondary btn-sm">
+                    <i class="fas fa-list mr-1"></i> Network Scan Results
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

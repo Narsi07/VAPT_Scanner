@@ -2,11 +2,14 @@
 # VAPT Security Platform
 
 from django.urls import path
+from django.views.generic import TemplateView
 from networkscanners import views
 
 app_name = "networkscanners"
 
 urlpatterns = [
+    # Unified launch hub page
+    path("launch/", TemplateView.as_view(template_name="launch/network_scan.html"), name="launch_hub"),
     # OpenVAS scanning
     path("launch_scan/", views.OpenvasLaunchScan.as_view(), name="launch_scan"),
     path("openvas_setting/", views.OpenvasSetting.as_view(), name="openvas_setting"),

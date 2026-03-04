@@ -2,11 +2,14 @@
 # VAPT Security Platform
 
 from django.urls import path
+from django.views.generic import TemplateView
 from staticscanners import views
 
 app_name = "staticscanners"
 
 urlpatterns = [
+    # Unified launch hub page
+    path("launch/", TemplateView.as_view(template_name="launch/static_scan.html"), name="launch_hub"),
     # Bandit SAST scan launch
     path("bandit_scan/", views.BanditScanLaunch.as_view(), name="bandit_scan"),
     # Semgrep SAST scan launch

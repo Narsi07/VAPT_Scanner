@@ -1,0 +1,64 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+{% block body %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-body">
+                <h2 class="card-title"><i class="fas fa-code mr-2"></i> Static Analysis</h2>
+                <p class="text-muted">Select a scanner to analyse your source code for security vulnerabilities.</p>
+                <hr>
+                <div class="row mt-4 justify-content-center">
+
+                    <!-- Bandit Card -->
+                    <div class="col-md-5 mb-4">
+                        <div class="card h-100 border-0 shadow-sm">
+                            <div class="card-body text-center p-4">
+                                <img src="/static/tools/bandit.png" width="64" class="mb-3" alt="Bandit"
+                                    onerror="this.src='/static/tools/zap.png'">
+                                <h4 class="card-title">Bandit</h4>
+                                <p class="text-muted small">Python-specific SAST tool by PyCQA. Analyzes Python source
+                                    code AST to find common security issues like hardcoded passwords, SQL injection, and
+                                    unsafe deserialization.</p>
+                                <span class="badge badge-primary mb-3">Python SAST</span>
+                                <br>
+                                <a href="{% url 'staticscanners:bandit_scan' %}" class="btn btn-primary btn-block">
+                                    <i class="fas fa-rocket mr-1"></i> Launch Bandit Scan
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Semgrep Card -->
+                    <div class="col-md-5 mb-4">
+                        <div class="card h-100 border-0 shadow-sm">
+                            <div class="card-body text-center p-4">
+                                <img src="/static/tools/semgrep.png" width="64" class="mb-3" alt="Semgrep"
+                                    onerror="this.src='/static/tools/zap.png'">
+                                <h4 class="card-title">Semgrep</h4>
+                                <p class="text-muted small">Multi-language SAST engine supporting Python, JavaScript,
+                                    Go, Java, and more. Uses expressive pattern rules to detect security bugs,
+                                    anti-patterns, and compliance violations.</p>
+                                <span class="badge badge-success mb-3">Multi-Lang SAST</span>
+                                <br>
+                                <a href="{% url 'staticscanners:semgrep_scan' %}" class="btn btn-primary btn-block">
+                                    <i class="fas fa-rocket mr-1"></i> Launch Semgrep Scan
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Results quick-links -->
+                <hr>
+                <h5 class="text-muted">View Results</h5>
+                <a href="{% url 'staticscanners:list_scans' %}" class="btn btn-outline-secondary btn-sm">
+                    <i class="fas fa-list mr-1"></i> Static Analysis Results
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

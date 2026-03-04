@@ -2,11 +2,14 @@
 # VAPT Security Platform
 
 from django.urls import path
+from django.views.generic import TemplateView
 from webscanners import views, web_views
 
 app_name = "webscanners"
 
 urlpatterns = [
+    # Unified launch hub page
+    path("launch/", TemplateView.as_view(template_name="launch/web_scan.html"), name="launch_hub"),
     # Main web scanner index / ZAP launch — template uses 'webscanners:index'
     path("", web_views.Index.as_view(), name="index"),
     # Cookie management — template uses 'webscanners:cookie_add', 'webscanners:cookies_del'
