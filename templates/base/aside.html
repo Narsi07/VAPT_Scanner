@@ -21,7 +21,7 @@
                                 </li>
                                 <li class="sidebar-item">
                                         <a class="sidebar-link waves-effect waves-dark"
-                                                href="{% url 'projects:project_create' %}" aria-expanded="false">
+                                                href="{% url 'dashboard:dashboard' %}" aria-expanded="false">
                                                 <i class="fas fa-project-diagram"></i>
                                                 <span class="hide-menu">Projects</span>
                                         </a>
@@ -99,7 +99,7 @@
                                         <a class="sidebar-link has-arrow waves-effect waves-dark" href="#"
                                                 aria-expanded="false">
                                                 <i class="fas fa-code"></i>
-                                                <span class="hide-menu">Code Analysis</span>
+                                                <span class="hide-menu">Static Analysis</span>
                                         </a>
                                         <ul aria-expanded="false" class="collapse first-level">
                                                 <li class="sidebar-item">
@@ -188,21 +188,6 @@
                                 </li>
 
                                 <li class="my-2 mx-3 border-top"></li>
-
-                                <!-- SECTION: Vulnerability Management -->
-                                <li class="nav-small-cap">
-                                        <i class="fas fa-minus"></i>
-                                        <span class="hide-menu">Vuln Management</span>
-                                </li>
-                                <li class="sidebar-item">
-                                        <a href="{% url 'jiraticketing:jira_setting' %}"
-                                                class="sidebar-link waves-effect waves-dark">
-                                                <i class="fas fa-ticket-alt"></i>
-                                                <span class="hide-menu">Jira Ticketing</span>
-                                        </a>
-                                </li>
-
-                                <li class="my-3 mx-3 border-top"></li>
 
                                 <!-- Settings (Admins only) -->
                                 {% if user.is_superuser == True %}
