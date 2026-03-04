@@ -110,12 +110,8 @@ class SslScanResult(APIView):
     def get(self, request):
         scan_id = request.GET.get("scan_id")
         if not scan_id:
-            # No scan_id provided — show the scan list page instead
-            from tools.models import SslscanResultDb as SslRes
-            all_sslscan = SslRes.objects.filter(organization=request.user.organization).values(
-                'scan_id', 'scan_url', 'date_time'
-            ).distinct('scan_id')
-            return render(request, "tools/sslscan_list.html", {"all_sslscan": all_sslscan})
+            # No scan_id — redirect to the SSL scan list page
+            return HttpResponseRedirect(reverse("tools:sslscan"))
         scan_result = SslscanResultDb.objects.filter(
             scan_id=scan_id, organization=request.user.organization
         )
