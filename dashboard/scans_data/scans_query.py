@@ -711,90 +711,66 @@ def all_cloud(project_id, query):
 
 
 def all_inspec(project_id, query):
+    if not COMPLIANCE_AVAILABLE or InspecScanDb is None:
+        return "0"
     all_inspec = None
     if query == "total":
         all_inspec_scan = InspecScanDb.objects.filter(
             project__uu_id=project_id
         ).aggregate(Sum("total_vuln"))
-
         for key, value in all_inspec_scan.items():
-            if value is None:
-                all_inspec = "0"
-            else:
-                all_inspec = value
-
+            all_inspec = "0" if value is None else value
     elif query == "failed":
         all_inspec_high = InspecScanDb.objects.filter(
             project__uu_id=project_id
         ).aggregate(Sum("inspec_failed"))
-
         for key, value in all_inspec_high.items():
-            if value is None:
-                all_inspec = "0"
-            else:
-                all_inspec = value
-
+            all_inspec = "0" if value is None else value
     elif query == "passed":
         all_inspec_medium = InspecScanDb.objects.filter(
             project__uu_id=project_id
         ).aggregate(Sum("inspec_passed"))
-
         for key, value in all_inspec_medium.items():
-            if value is None:
-                all_inspec = "0"
-            else:
-                all_inspec = value
-
+            all_inspec = "0" if value is None else value
     elif query == "skipped":
         all_inspec_low = InspecScanDb.objects.filter(
             project__uu_id=project_id
         ).aggregate(Sum("inspec_skipped"))
-
         for key, value in all_inspec_low.items():
-            if value is None:
-                all_inspec = "0"
-            else:
-                all_inspec = value
-
+            all_inspec = "0" if value is None else value
     return all_inspec
 
 
 def all_dockle(project_id, query):
+    if not COMPLIANCE_AVAILABLE or DockleScanDb is None:
+        return "0"
     all_dockle = None
     if query == "total":
         all_dockle_scan = DockleScanDb.objects.filter(
             project__uu_id=project_id
         ).aggregate(Sum("total_vuln"))
-
         for key, value in all_dockle_scan.items():
-            if value is None:
-                all_dockle = "0"
-            else:
-                all_dockle = value
-
+            all_dockle = "0" if value is None else value
     elif query == "fatal":
         all_dockle_high = DockleScanDb.objects.filter(
             project__uu_id=project_id
         ).aggregate(Sum("dockle_fatal"))
-
         for key, value in all_dockle_high.items():
-            if value is None:
-                all_dockle = "0"
-            else:
-                all_dockle = value
-
+            all_dockle = "0" if value is None else value
     elif query == "info":
         all_dockle_medium = DockleScanDb.objects.filter(
             project__uu_id=project_id
         ).aggregate(Sum("dockle_info"))
-
         for key, value in all_dockle_medium.items():
-            if value is None:
-                all_dockle = "0"
-            else:
-                all_dockle = value
-
+            all_dockle = "0" if value is None else value
     return all_dockle
+
+
+def _cloud_filter(query_kwargs):
+    """Return CloudScansResultsDb queryset or empty list if unavailable."""
+    if not CLOUD_AVAILABLE or CloudScansResultsDb is None:
+        return []
+    return CloudScansResultsDb.objects.filter(**query_kwargs)
 
 
 def all_vuln_count(project_id, query):
@@ -809,9 +785,7 @@ def all_vuln_count(project_id, query):
             project__uu_id=project_id, severity="Critical"
         )
 
-        cloud_all_critical = CloudScansResultsDb.objects.filter(
-            project__uu_id=project_id, severity="Critical"
-        )
+        cloud_all_critical = _cloud_filter({"project__uu_id": project_id, "severity": "Critical"})
 
         net_all_critical = NetworkScanResultsDb.objects.filter(
             severity="Critical", project__uu_id=project_id
@@ -837,9 +811,7 @@ def all_vuln_count(project_id, query):
             project__uu_id=project_id, severity="High"
         )
 
-        cloud_all_high = CloudScansResultsDb.objects.filter(
-            project__uu_id=project_id, severity="High"
-        )
+        cloud_all_high = _cloud_filter({"project__uu_id": project_id, "severity": "High"})
 
         net_all_high = NetworkScanResultsDb.objects.filter(
             severity="High", project__uu_id=project_id
@@ -866,9 +838,7 @@ def all_vuln_count(project_id, query):
             project__uu_id=project_id, severity="Medium"
         )
 
-        cloud_all_medium = CloudScansResultsDb.objects.filter(
-            project__uu_id=project_id, severity="Medium"
-        )
+        cloud_all_medium = _cloud_filter({"project__uu_id": project_id, "severity": "Medium"})
 
         net_all_medium = NetworkScanResultsDb.objects.filter(
             severity="Medium", project__uu_id=project_id
@@ -896,9 +866,7 @@ def all_vuln_count(project_id, query):
             project__uu_id=project_id, severity="Low"
         )
 
-        cloud_all_low = CloudScansResultsDb.objects.filter(
-            project__uu_id=project_id, severity="Low"
-        )
+        cloud_all_low = _cloud_filter({"project__uu_id": project_id, "severity": "Low"})
 
         net_all_low = NetworkScanResultsDb.objects.filter(
             severity="Low", project__uu_id=project_id
@@ -925,9 +893,7 @@ def all_vuln_count(project_id, query):
             project__uu_id=project_id,
         )
 
-        cloud_all = CloudScansResultsDb.objects.filter(
-            project__uu_id=project_id,
-        )
+        cloud_all = _cloud_filter({"project__uu_id": project_id})
 
         net_all = NetworkScanResultsDb.objects.filter(project__uu_id=project_id)
 
@@ -950,9 +916,7 @@ def all_vuln_count(project_id, query):
             project__uu_id=project_id, false_positive="Yes"
         )
 
-        cloud_all_false = CloudScansResultsDb.objects.filter(
-            project__uu_id=project_id, false_positive="Yes"
-        )
+        cloud_all_false = _cloud_filter({"project__uu_id": project_id, "false_positive": "Yes"})
 
         net_all_false = NetworkScanResultsDb.objects.filter(
             project__uu_id=project_id, false_positive="Yes"
@@ -973,9 +937,7 @@ def all_vuln_count(project_id, query):
             project__uu_id=project_id, vuln_status="Closed"
         )
 
-        cloud_all_close = CloudScansResultsDb.objects.filter(
-            project__uu_id=project_id, vuln_status="Closed"
-        )
+        cloud_all_close = _cloud_filter({"project__uu_id": project_id, "vuln_status": "Closed"})
 
         net_all_close = NetworkScanResultsDb.objects.filter(
             project__uu_id=project_id, vuln_status="Closed"
@@ -996,9 +958,7 @@ def all_vuln_count(project_id, query):
             project__uu_id=project_id, vuln_status="Open"
         )
 
-        cloud_all_open = CloudScansResultsDb.objects.filter(
-            project__uu_id=project_id, vuln_status="Open"
-        )
+        cloud_all_open = _cloud_filter({"project__uu_id": project_id, "vuln_status": "Open"})
 
         net_all_open = NetworkScanResultsDb.objects.filter(
             project__uu_id=project_id, vuln_status="Open"
@@ -1025,9 +985,7 @@ def all_vuln_count_data(project_id, query):
             false_positive="Yes", project__uu_id=project_id
         )
 
-        cloud_false_positive = CloudScansResultsDb.objects.filter(
-            false_positive="Yes", project__uu_id=project_id
-        )
+        cloud_false_positive = _cloud_filter({"false_positive": "Yes", "project__uu_id": project_id})
 
         net_false_positive = NetworkScanResultsDb.objects.filter(
             false_positive="Yes", project__uu_id=project_id
@@ -1053,9 +1011,7 @@ def all_vuln_count_data(project_id, query):
             vuln_status="Closed", project__uu_id=project_id
         )
 
-        cloud_closed_vuln = CloudScansResultsDb.objects.filter(
-            vuln_status="Closed", project__uu_id=project_id
-        )
+        cloud_closed_vuln = _cloud_filter({"vuln_status": "Closed", "project__uu_id": project_id})
 
         pentest_closed_vuln = PentestScanResultsDb.objects.filter(
             vuln_status="Closed", project__uu_id=project_id
@@ -1079,9 +1035,7 @@ def all_vuln_count_data(project_id, query):
             vuln_status="Open", project__uu_id=project_id
         )
 
-        cloud_open_vuln = CloudScansResultsDb.objects.filter(
-            vuln_status="Open", project__uu_id=project_id
-        )
+        cloud_open_vuln = _cloud_filter({"vuln_status": "Open", "project__uu_id": project_id})
 
         pentest_open_vuln = PentestScanResultsDb.objects.filter(
             vuln_status="Open", project__uu_id=project_id
