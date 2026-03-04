@@ -111,7 +111,7 @@ DATABASES = {
         'NAME': 'vaptdb',
         'USER': 'vaptuser',
         'PASSWORD': 'vaptpass',
-        'HOST': '127.0.0.1',
+        'HOST': '',
         'PORT': '5432',
     }
 }
