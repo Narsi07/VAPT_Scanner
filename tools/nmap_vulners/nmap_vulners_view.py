@@ -36,10 +36,16 @@ def nmap_vulners(request):
         project_id = request.POST.get("project_id")
 
         if not project_id:
-            project_id = None
+            project = None
+        else:
+            try:
+                from projects.models import ProjectDb
+                project = ProjectDb.objects.get(uu_id=project_id)
+            except Exception:
+                project = None
 
         try:
-            run_nmap_vulners(ip_addr=ip_address, project_id=project_id)
+            run_nmap_vulners(ip_addr=ip_address, project=project)
             notify.send(user, recipient=user, verb="NMAP Scan Completed")
         except Exception as e:
             print("Error in nmap_vulners scan:", e)

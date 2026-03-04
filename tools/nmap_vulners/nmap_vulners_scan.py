@@ -11,7 +11,7 @@ from vaptsettings.models import NmapVulnersSettingDb
 from tools.models import NmapScanDb, NmapVulnersPortResultDb
 
 
-def parse_port(proto, ip_addr, host_data, scan_id, project_id):
+def parse_port(proto, ip_addr, host_data, scan_id, project):
     ports = host_data.get(proto)
     if not ports:
         return
@@ -24,7 +24,7 @@ def parse_port(proto, ip_addr, host_data, scan_id, project_id):
         nmap_obj.protocol = proto
         nmap_obj.state = portData.get("state")
         nmap_obj.scan_id = scan_id
-        nmap_obj.project_id = project_id
+        nmap_obj.project = project
         nmap_obj.reason = portData.get("reason")
         nmap_obj.reason_ttl = portData.get("reason_ttl")
         nmap_obj.version = portData.get("version")
@@ -49,7 +49,7 @@ def parse_port(proto, ip_addr, host_data, scan_id, project_id):
         nmap_obj.save()
 
 
-def run_nmap_vulners(ip_addr="", project_id=""):
+def run_nmap_vulners(ip_addr="", project=None):
     if not ip_addr:
         raise ValueError("[NMAP_VULNERS] - ip_addr must be specified")
 
@@ -85,8 +85,8 @@ def run_nmap_vulners(ip_addr="", project_id=""):
     NmapVulnersPortResultDb.objects.filter(ip_address=ip_addr).delete()
 
     for host, host_data in scan.items():
-        parse_port("tcp", host, host_data, scan_id, project_id)
-        parse_port("udp", host, host_data, scan_id, project_id)
+        parse_port("tcp", host, host_data, scan_id, project)
+        parse_port("udp", host, host_data, scan_id, project)
 
         all_data = NmapVulnersPortResultDb.objects.filter(ip_address=host)
         # for a in all_data:
@@ -110,7 +110,7 @@ def run_nmap_vulners(ip_addr="", project_id=""):
 
         save_scan = NmapScanDb(
             scan_id=scan_id,
-            project_id=project_id,
+            project=project,
             scan_ip=host,
             total_ports=total_ports,
             total_open_ports=total_open_p,

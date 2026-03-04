@@ -84,7 +84,7 @@ class SslScanLaunch(APIView):
                 sslscan_output = subprocess.check_output(
                     ["sslscan", "--no-colour", scans_url]
                 )
-                notify.send(recipient=user, verb="SSLScan Completed")
+                notify.send(user, recipient=user, verb="SSLScan Completed")
 
             except Exception as e:
                 print(e)
