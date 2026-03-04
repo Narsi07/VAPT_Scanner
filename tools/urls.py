@@ -1,29 +1,27 @@
 # -*- coding: utf-8 -*-
 # VAPT Security Platform
-# Additional Security Tools (SSL Scan, Nikto, DNS Enumeration)
 
 from django.urls import path
 from tools import views
-from tools.scanner_consolidated import (
-    NiktoScannerView,
-    SSLScannerView,
-    DnsEnumerationView
-)
 
 app_name = "tools"
 
 urlpatterns = [
-    # Consolidated Nikto Web Server Scanner
-    path("nikto/", NiktoScannerView.as_view(), name="nikto"),
-    
-    # Consolidated SSL/TLS Certificate Scanner
-    path("sslscan/", SSLScannerView.as_view(), name="sslscan"),
-    
-    # Consolidated DNS Enumeration Tool
-    path("dns_enum/", DnsEnumerationView.as_view(), name="dns_enum"),
-    
-    # Legacy endpoints for compatibility
+    # SSL scanning
+    path("sslscan/", views.SslScanList.as_view(), name="sslscanlist"),
+    path("sslscanlaunch/", views.SslScanLaunch.as_view(), name="sslscanlaunch"),
+    path("sslscanresult/", views.SslScanResult.as_view(), name="sslscanresult"),
+    path("sslscan_delete/", views.SslScanDelete.as_view(), name="sslscan_delete"),
+    # Nikto scanning
+    path("nikto/", views.NiktoScanList.as_view(), name="niktolist"),
+    path("niktolaunch/", views.NiktoScanLaunch.as_view(), name="niktolaunch"),
+    path("niktoresult/", views.NiktoScanResult.as_view(), name="niktoresult"),
+    path("nikto_vuln/", views.NiktoResultVuln.as_view(), name="nikto_vuln"),
+    path("nikto_vuln_delete/", views.NiktoVulnDelete.as_view(), name="nikto_vuln_delete"),
+    path("nikto_scan_delete/", views.NiktoScanDelete.as_view(), name="nikto_scan_delete"),
+    # Nmap
     path("nmap/", views.Nmap.as_view(), name="nmap"),
     path("nmap_scan/", views.NmapScan.as_view(), name="nmap_scan"),
-    path("nmap_vulners/", views.nmap_vulners, name="nmap_vulners"),
+    path("nmap_result/", views.NmapResult.as_view(), name="nmap_result"),
+    path("nmap_scan_delete/", views.NmapScanDelete.as_view(), name="nmap_scan_delete"),
 ]
