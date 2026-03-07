@@ -184,17 +184,17 @@ def xml_parser(root, project_id, scan_id, request=None, organization=None):
                                     )
                                     total_close_p = len(all_close_p)
 
-                                     # UPDATE the existing NmapScanDb record created by _run_nmap
-                                     # (instead of INSERTing a duplicate with a bad project_id UUID)
-                                     NmapScanDb.objects.filter(
-                                         scan_id=scan_id,
-                                         organization=organization,
-                                     ).update(
-                                         scan_ip=ip_address,
-                                         total_ports=total_ports,
-                                         total_open_ports=total_open_p,
-                                         total_close_ports=total_close_p,
-                                     )
+                                    # UPDATE the existing NmapScanDb record created by _run_nmap
+                                    # (instead of INSERTing a duplicate with a bad project_id UUID)
+                                    NmapScanDb.objects.filter(
+                                        scan_id=scan_id,
+                                        organization=organization,
+                                    ).update(
+                                        scan_ip=ip_address,
+                                        total_ports=total_ports,
+                                        total_open_ports=total_open_p,
+                                        total_close_ports=total_close_p,
+                                    )
 
 
 parser_header_dict = {}
