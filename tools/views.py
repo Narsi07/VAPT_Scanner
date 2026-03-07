@@ -124,9 +124,16 @@ def _run_nmap(ip_address, scan_id, project_id, user, organization):
     try:
         print("[VAPT] Starting Nmap scan on", ip_address)
         subprocess.check_output(
-            ["nmap", "-v", "-sV", "-Pn", "-p", "1-65535",
-             ip_address, "-oX", "output.xml"],
-            timeout=1800,
+            [
+                "nmap", "-v", "-sV", "-Pn",
+                "-T4",                  # Aggressive timing (4x faster than default)
+                "--max-retries", "1",   # Only retry each port once instead of 3x
+                "--host-timeout", "300s",  # Give up on host after 5 minutes total
+                "-p", "1-65535",
+                ip_address,
+                "-oX", "output.xml",
+            ],
+            timeout=3600,               # 1 hour outer safety net
             stderr=subprocess.STDOUT,
         )
         print("[VAPT] Nmap scan completed for", ip_address)
