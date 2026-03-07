@@ -81,6 +81,10 @@
                                             class="btn btn-xs btn-primary mr-1">
                                             <i class="fas fa-eye"></i> View
                                         </a>
+                                        <a href="/tools/nmap_vulners/?ip={{ data.scan_ip }}"
+                                            class="btn btn-xs btn-purple mr-1" style="background:#6f42c1;color:#fff">
+                                            <i class="fas fa-bug"></i> View CVEs
+                                        </a>
                                         <form action="{% url 'tools:nmap_scan_delete' %}" method="post" class="d-inline"
                                             onsubmit="return confirm('Delete this scan?')">
                                             {% csrf_token %}
