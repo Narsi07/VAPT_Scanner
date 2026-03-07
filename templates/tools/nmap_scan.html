@@ -13,62 +13,67 @@
                 </div>
 
                 <div class="row mb-3">
-                    <div class="table-responsive">
+                    <div class="table-responsive col-12">
                         <table id="data_table" class="table table-bordered data-table">
                             <thead class="thead-dark">
                                 <tr>
-                                    <th><label class="customcheckbox m-b-20">
-                                            <input type="checkbox" id="mainCheckbox">
-                                            <span class="checkmark"></span>
-                                        </label></th>
-                                    <th><i class="fas fa-server mr-1"></i> Target IP</th>
-                                    <th><i class="fas fa-plug mr-1"></i> Total Ports</th>
-                                    <th><i class="fas fa-door-open mr-1 text-success"></i> Open</th>
-                                    <th><i class="fas fa-door-closed mr-1 text-danger"></i> Closed</th>
-                                    <th><i class="fas fa-tasks mr-1"></i> Status</th>
+                                    <th>#</th>
+                                    <th>Target IP</th>
+                                    <th>Total Ports</th>
+                                    <th>Open</th>
+                                    <th>Closed</th>
+                                    <th>Status</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for data in all_nmap %}
                                 <tr>
-                                    <td>
-                                        <label class="customcheckbox">
-                                            <input type="checkbox" class="listCheckbox" value="{{ data.scan_id }}"
-                                                name="del_scan_id">
-                                            <span class="checkmark"></span>
-                                        </label>
-                                    </td>
+                                    <td>{{ forloop.counter }}</td>
                                     <td>
                                         <a href="/tools/nmap_result/?scan_id={{ data.scan_id }}">
                                             <i class="fas fa-crosshairs mr-1 text-muted"></i>{{ data.scan_ip }}
                                         </a>
                                     </td>
                                     <td>
-                                        <span class="badge badge-pill badge-dark">{{ data.total_ports|default:"—"
-                                            }}</span>
-                                    </td>
-                                    <td>
-                                        <span class="badge badge-pill badge-success">{{
-                                            data.total_open_ports|default:"0" }}</span>
-                                    </td>
-                                    <td>
-                                        <span class="badge badge-pill badge-danger">{{
-                                            data.total_close_ports|default:"0" }}</span>
-                                    </td>
-                                    <td>
-                                        {% if not data.total_ports %}
-                                        <div class="progress active progress-striped" style="height:18px">
-                                            <div class="progress-bar progress-bar-striped progress-bar-animated bg-warning"
-                                                role="progressbar" style="width:60%"></div>
-                                        </div>
-                                        <small class="text-warning">Scanning…</small>
+                                        {% if data.total_ports %}
+                                        <span class="badge badge-secondary">{{ data.total_ports }}</span>
                                         {% else %}
-                                        <div class="progress" style="height:18px">
-                                            <div class="progress-bar bg-success" role="progressbar" style="width:100%">
-                                            </div>
+                                        <span class="text-muted">—</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if data.total_open_ports %}
+                                        <span class="badge badge-success">{{ data.total_open_ports }}</span>
+                                        {% else %}
+                                        <span class="text-muted">—</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if data.total_close_ports %}
+                                        <span class="badge badge-danger">{{ data.total_close_ports }}</span>
+                                        {% else %}
+                                        <span class="text-muted">—</span>
+                                        {% endif %}
+                                    </td>
+                                    <td style="min-width:120px">
+                                        {% if data.total_ports %}
+                                        <div class="progress mb-1" style="height:14px;border-radius:4px">
+                                            <div class="progress-bar bg-success" role="progressbar" style="width:100%"
+                                                aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
                                         </div>
-                                        <small class="text-success">Completed</small>
+                                        <small class="text-success font-weight-bold">
+                                            <i class="fas fa-check-circle mr-1"></i>Completed
+                                        </small>
+                                        {% else %}
+                                        <div class="progress mb-1" style="height:14px;border-radius:4px">
+                                            <div class="progress-bar progress-bar-striped progress-bar-animated bg-warning"
+                                                role="progressbar" style="width:60%" aria-valuenow="60"
+                                                aria-valuemin="0" aria-valuemax="100"></div>
+                                        </div>
+                                        <small class="text-warning font-weight-bold">
+                                            <i class="fas fa-spinner fa-spin mr-1"></i>Scanning…
+                                        </small>
                                         {% endif %}
                                     </td>
                                     <td>
@@ -80,7 +85,7 @@
                                             onsubmit="return confirm('Delete this scan?')">
                                             {% csrf_token %}
                                             <input type="hidden" name="scan_id" value="{{ data.scan_id }}" />
-                                            <button class="btn btn-xs btn-danger">
+                                            <button type="submit" class="btn btn-xs btn-danger">
                                                 <i class="fas fa-trash"></i>
                                             </button>
                                         </form>
@@ -90,7 +95,7 @@
                                 <tr>
                                     <td colspan="7" class="text-center py-4 text-muted">
                                         <i class="fas fa-info-circle mr-1"></i>
-                                        No Nmap scans found. Launch a scan from
+                                        No Nmap scans yet. Launch a scan from
                                         <a href="{% url 'tools:nmap' %}">Network Tools</a>.
                                     </td>
                                 </tr>
