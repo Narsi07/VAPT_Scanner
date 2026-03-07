@@ -31,22 +31,26 @@ osgen = None
 accuracy = None
 
 
-def xml_parser(root, project_id, scan_id, request):
+def xml_parser(root, project_id, scan_id, request=None, organization=None):
     """
 
     :param root:
     :param project_id:
     :param scan_id:
+    :param request: HTTP request (optional — not needed when called from background thread)
+    :param organization: Organization object (required when request is None)
     :return:
     """
     global ip_address, port, protocol, used_state, used_portid, used_proto, state, reason, reason_ttl, version, extrainfo, name, conf, method, cpe, type_p, osfamily, vendor, osgen, accuracy
 
-    api_key = request.META.get("HTTP_X_API_KEY")
-    key_object = OrgAPIKey.objects.filter(api_key=api_key).first()
-    if str(request.user) == 'AnonymousUser':
-        organization = key_object.organization
-    else:
-        organization = request.user.organization
+    # Resolve organization — either passed directly (background thread) or from request
+    if organization is None:
+        api_key = request.META.get("HTTP_X_API_KEY")
+        key_object = OrgAPIKey.objects.filter(api_key=api_key).first()
+        if str(request.user) == 'AnonymousUser':
+            organization = key_object.organization
+        else:
+            organization = request.user.organization
     
     for nmap in root:
         for scaninfo in nmap:

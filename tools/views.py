@@ -149,7 +149,7 @@ def _run_nmap(ip_address, scan_id, project_id, user, organization):
         import defusedxml.ElementTree as ET2
         tree = ET2.parse("output.xml")
         root_xml = tree.getroot()
-        nmap_parser.xml_parser(root=root_xml, scan_id=scan_id, project_id=project_id)
+        nmap_parser.xml_parser(root=root_xml, scan_id=scan_id, project_id=project_id, organization=organization)
         notify.send(user, recipient=user, verb="Nmap scan completed: %s" % ip_address)
     except Exception as e:
         print("[VAPT] Nmap XML parse error:", e)
