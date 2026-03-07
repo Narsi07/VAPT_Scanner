@@ -1,132 +1,123 @@
 {% extends 'dashboard/base.html' %}
 
 {% block body %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-body">
 
-<script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
-<script type="text/javascript">
-
-    $("#checkAll").change(function () {
-        $("input:checkbox").prop('checked', $(this).prop("checked"));
-    });
-    $(document).ready(function() {
-        $("button").click(function(){
-            var scan_id = ['a7af5b68-b661-45ad-90fd-ffa27526cdce'];
-            $.each($("input[name='del_scan_id']:checked"), function(){
-                scan_id.push($(this).val());
-            });
-
-            var json_scanid = scan_id.join(", ");
-            $.ajax({
-                type:'POST',
-                <!--contentType: 'application/json; charset=utf-8',-->
-                url:'/tools/nmap_scan_del/',
-                data:{
-                   scan_id: json_scanid,
-                   csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val()
-                },
-                sucess:function(){
-
-                }
-            });
-            setTimeout(function(){location.reload();},1000);
-        });
-
-    });
-
-
-
-
-
-
-
-</script>
-
-
-        <div class="row">
-            <div class="col-md-12">
-                <div class="card">
-                    <div class="card-body">
-                        <div class="float-right">
-                            <button type="button" class="btn btn-danger btn-mini" onclick="">Delete Selected</button>
-                        </div>
-                        <br>
-                        <div class="d-md-flex align-items-center">
-                            <h5 class="card-title">Nmap Scan List</h5>
-                        </div>
-                        <br>
-                        <div class="row">
-                            <div class="table-responsive">
-                                <!--<table id="data_table" class="table table-striped table-bordered" width="100%">-->
-                                <table id="data_table" class="table table-bordered data-table">
-                                    <thead>
-                                    <tr>
-                                        <!--<th><p><label><input type="checkbox" id="checkAll"/></label></p></th>-->
-                                        <th><label class="customcheckbox m-b-20">
-                                            <input type="checkbox" id="mainCheckbox">
-                                            <span class="checkmark"></span>
-                                        </label></th>
-                                        <th>URL</th>
-                                        <th>Port</th>
-                                        <th>state</th>
-                                        <th>version</th>
-                                        <th>Service</th>
-                                        <th>osfamily</th>
-                                        <th>osgen</th>
-                                        <th>cpe</th>
-                                        <th>Action</th>
-                                    </tr>
-                                    </thead>
-                                    <tbody>
-
-                                    {% for data in all_nmap %}
-                                    <tr data-target="#">
-                                        <td>
-                                            <form>
-                                                <label class="customcheckbox">
-                                                    <input type="checkbox" class="listCheckbox"
-                                                           value="{{data.scan_id}}"
-                                                           name="del_scan_id"
-                                                           onClick="reload">
-                                                    <span class="checkmark"></span>
-                                                </label>
-                                            </form>
-                                        </td>
-                                        <td><a href="#">{{ data.ip_address }}</a>
-                                        </td>
-                                        {% if data.vulners_extrainfo %}
-                                        <td>
-                                            <a href="/tools/nmap_vulners_port_list/?ip={{data.ip_address}}&port={{data.port}}">
-                                                <p style="color: red;">{{data.port}}</p>
-                                            </a>
-                                        </td>
-                                        {% else %}
-                                        <td>{{ data.port }}</td>
-                                        {% endif %}
-
-                                        <td>{{data.state}}</td>
-                                        <td>{{data.version}}</td>
-                                        <td>{{data.name}}</td>
-                                        <td>{{data.osfamily}}</td>
-                                        <td>{{data.osgen}}</td>
-                                        <td>{{data.cpe}}</td>
-                                        <td>
-                                            <form action="/tools/nmap_scan_del/" method="post" class="forms-sample">
-
-                                                {% csrf_token %}
-                                                <input type="hidden" name="scan_id" value="{{data.scan_id}}"/>
-                                                <button class="btn btn-danger"><i class="fas fa-times"></i></button>
-                                            </form>
-                                        </td>
-
-                                        {% endfor %}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
+                <div class="d-md-flex align-items-center mb-3">
+                    <h1 class="card-title mb-0">
+                        <i class="fas fa-bug mr-2 text-danger"></i>Nmap + Vulners Results
+                    </h1>
+                    <a href="{% url 'tools:nmap_scan' %}" class="btn btn-outline-secondary btn-sm ml-auto">
+                        <i class="fas fa-arrow-left mr-1"></i> Back to Scans
+                    </a>
                 </div>
+                <hr>
+
+                <div class="table-responsive">
+                    <table id="data_table" class="table table-bordered data-table">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th><label class="customcheckbox m-b-20">
+                                        <input type="checkbox" id="mainCheckbox">
+                                        <span class="checkmark"></span>
+                                    </label></th>
+                                <th><i class="fas fa-network-wired mr-1"></i> IP Address</th>
+                                <th><i class="fas fa-plug mr-1"></i> Port</th>
+                                <th><i class="fas fa-toggle-on mr-1"></i> State</th>
+                                <th><i class="fas fa-tag mr-1"></i> Version</th>
+                                <th><i class="fas fa-cogs mr-1"></i> Service</th>
+                                <th><i class="fas fa-desktop mr-1"></i> OS Family</th>
+                                <th><i class="fas fa-microchip mr-1"></i> OS Gen</th>
+                                <th><i class="fas fa-fingerprint mr-1"></i> CPE</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for data in all_nmap %}
+                            <tr>
+                                <td>
+                                    <label class="customcheckbox">
+                                        <input type="checkbox" class="listCheckbox" value="{{ data.scan_id }}"
+                                            name="del_scan_id">
+                                        <span class="checkmark"></span>
+                                    </label>
+                                </td>
+                                <td><code>{{ data.ip_address }}</code></td>
+                                <td>
+                                    {% if data.vulners_extrainfo %}
+                                    <a
+                                        href="/tools/nmap_vulners_port_list/?ip={{ data.ip_address }}&port={{ data.port }}">
+                                        <span class="badge badge-pill badge-danger" title="Vulners CVEs found">
+                                            <i class="fas fa-exclamation-triangle mr-1"></i>{{ data.port }}
+                                        </span>
+                                    </a>
+                                    {% else %}
+                                    <span class="badge badge-pill badge-dark">{{ data.port }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if data.state == "open" %}
+                                    <span class="badge badge-success"><i
+                                            class="fas fa-check-circle mr-1"></i>open</span>
+                                    {% elif data.state == "closed" %}
+                                    <span class="badge badge-danger"><i
+                                            class="fas fa-times-circle mr-1"></i>closed</span>
+                                    {% else %}
+                                    <span class="badge badge-warning">{{ data.state }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if data.version %}
+                                    <span class="badge badge-pill badge-info">{{ data.version }}</span>
+                                    {% else %}
+                                    <span class="text-muted">—</span>
+                                    {% endif %}
+                                </td>
+                                <td><strong>{{ data.name }}</strong></td>
+                                <td>{{ data.osfamily|default:"—" }}</td>
+                                <td>{{ data.osgen|default:"—" }}</td>
+                                <td>
+                                    {% if data.cpe %}
+                                    <code style="font-size:0.8em">{{ data.cpe }}</code>
+                                    {% else %}
+                                    <span class="text-muted">—</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if data.vulners_extrainfo %}
+                                    <a href="/tools/nmap_vulners_port_list/?ip={{ data.ip_address }}&port={{ data.port }}"
+                                        class="btn btn-xs btn-danger mr-1">
+                                        <i class="fas fa-bug"></i> CVEs
+                                    </a>
+                                    {% endif %}
+                                    <form action="{% url 'tools:nmap_scan_delete' %}" method="post" class="d-inline"
+                                        onsubmit="return confirm('Delete this entry?')">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="scan_id" value="{{ data.scan_id }}" />
+                                        <button class="btn btn-xs btn-outline-danger">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="10" class="text-center py-4 text-muted">
+                                    <i class="fas fa-info-circle mr-1"></i>
+                                    No Nmap+Vulners results found.
+                                    <a href="{% url 'tools:nmap_vulners' %}">Run a scan</a>.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
             </div>
         </div>
-
-
+    </div>
+</div>
 {% endblock %}

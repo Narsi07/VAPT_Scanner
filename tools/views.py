@@ -547,23 +547,12 @@ class NmapScanDelete(APIView):
     permission_classes = (IsAuthenticated, permissions.IsAnalyst)
 
     def post(self, request):
-        ip_address = request.POST.get("ip_address")
-
-        scan_item = str(ip_address)
-        value = scan_item.replace(" ", "")
-        value_split = value.split(",")
-        split_length = value_split.__len__()
-
-        for i in range(0, split_length):
-            vuln_id = value_split.__getitem__(i)
-
-            del_scan = NmapResultDb.objects.filter(
-                ip_address=vuln_id, organization=request.user.organization
-            )
-            del_scan.delete()
-            del_scan = NmapScanDb.objects.filter(
-                scan_ip=vuln_id, organization=request.user.organization
-            )
-            del_scan.delete()
-
+        scan_id = request.POST.get("scan_id")
+        if scan_id:
+            NmapResultDb.objects.filter(
+                scan_id=scan_id, organization=request.user.organization
+            ).delete()
+            NmapScanDb.objects.filter(
+                scan_id=scan_id, organization=request.user.organization
+            ).delete()
         return HttpResponseRedirect(reverse("tools:nmap_scan"))
