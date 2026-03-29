@@ -1,114 +1,72 @@
 {% extends 'dashboard/base.html' %}
 
 {% block body %}
-
-<script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
-<script type="text/javascript">
-
-    $("#checkAll").change(function () {
-        $("input:checkbox").prop('checked', $(this).prop("checked"));
-    });
-    $(document).ready(function () {
-        $("button").click(function () {
-            var scan_id = ['a7af5b68-b661-45ad-90fd-ffa27526cdce'];
-            $.each($("input[name='del_scan_id']:checked"), function () {
-                scan_id.push($(this).val());
-            });
-
-            var json_scanid = scan_id.join(", ");
-            $.ajax({
-                type: 'POST',
-                <!--contentType: 'application/json; charset=utf-8',-->
-                url: '{% url "tools:sslscan_delete" %}',
-                data: {
-                    scan_id: json_scanid,
-                    csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val()
-                },
-                sucess: function () {
-
-                }
-            });
-            setTimeout(function () { location.reload(); }, 1000);
-        });
-
-    });
-
-
-
-
-</script>
-
-
 <div class="row">
     <div class="col-md-12">
         <div class="card">
             <div class="card-body">
-                <div class="float-right">
-                    <button type="button" class="btn btn-danger btn-mini" onclick="">Delete Selected</button>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-lock mr-2 text-primary"></i>SSLScan Scan List
+                    </h5>
                 </div>
-                <br>
-                <br>
-                <br>
-                <div class="d-md-flex align-items-center">
-                    <h5 class="card-title">SSLScan Scan List</h5>
+
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th>#</th>
+                                <th>URL</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for data in all_sslscan %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td>
+                                    {% if data.scan_url %}
+                                    {{ data.scan_url }}
+                                    {% else %}
+                                    <span class="text-muted">—</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if not data.sslscan_output or data.sslscan_output == "[Scanning...]" %}
+                                    <span class="badge badge-warning">Scanning...</span>
+                                    {% elif data.sslscan_output|slice:":7" == "[ERROR]" %}
+                                    <span class="badge badge-danger">Failed</span>
+                                    {% else %}
+                                    <span class="badge badge-success">Completed</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="/tools/sslscanresult/?scan_id={{ data.scan_id }}"
+                                        class="btn btn-xs btn-primary mr-1">
+                                        <i class="fas fa-eye"></i> View
+                                    </a>
+                                    <form action="{% url 'tools:sslscan_delete' %}" method="post" class="d-inline"
+                                        onsubmit="return confirm('Delete this scan?')">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="scan_id" value="{{ data.scan_id }}" />
+                                        <button type="submit" class="btn btn-xs btn-danger">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center text-muted">No SSL scans yet.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
                 </div>
-                <br>
-                <div class="row">
-                    <div class="table-responsive">
-                        <!--<table id="data_table" class="table table-striped table-bordered" width="100%">-->
-                        <table id="data_table" class="table table-bordered data-table">
-                            <thead>
-                                <tr>
-                                    <th><label class="customcheckbox m-b-20">
-                                            <input type="checkbox" id="mainCheckbox">
-                                            <span class="checkmark"></span>
-                                        </label></th>
-                                    <th>URL</th>
-                                    <th>Status</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for data in all_sslscan %}
-                                <tr>
-                                    <td>
-                                        <label class="customcheckbox">
-                                            <input type="checkbox" class="listCheckbox" value="{{ data.scan_id }}"
-                                                name="del_scan_id">
-                                            <span class="checkmark"></span>
-                                        </label>
-                                    </td>
-                                    <td>
-                                        <a href="/tools/sslscan_result/?scan_id={{ data.scan_id }}">{{ data.scan_url
-                                            }}</a>
-                                    </td>
-                                    <td>
-                                        {% if data.sslscan_output == "[Scanning...]" or not data.sslscan_output %}
-                                        <span class="badge badge-warning">Scanning...</span>
-                                        {% elif data.sslscan_output|slice:":7" == "[ERROR]" %}
-                                        <span class="badge badge-danger">Failed</span>
-                                        {% else %}
-                                        <span class="badge badge-success">Completed</span>
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                        <form action="{% url 'tools:sslscan_delete' %}" method="post"
-                                            class="forms-sample d-inline">
-                                            {% csrf_token %}
-                                            <input type="hidden" name="scan_id" value="{{ data.scan_id }}" />
-                                            <button class="btn btn-danger btn-sm"><i class="fas fa-trash"></i></button>
-                                        </form>
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+
             </div>
         </div>
     </div>
 </div>
-
-
 {% endblock %}
