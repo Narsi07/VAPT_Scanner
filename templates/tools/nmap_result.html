@@ -26,13 +26,7 @@
                     </div>
                     <div class="col-md-3">
                         <div class="card border-0 shadow-sm p-3">
-                            <h4 class="text-success mb-0">
-                                {% with open_count=0 %}
-                                {% for r in scan_result %}{% if r.state == "open" %}{% with open_count=open_count|add:1
-                                %}{% endwith %}{% endif %}{% endfor %}
-                                {{ scan_result|length }}
-                                {% endwith %}
-                            </h4>
+                            <h4 class="text-success mb-0">{{ scan_result|length }}</h4>
                             <small class="text-muted">Open Ports</small>
                         </div>
                     </div>
