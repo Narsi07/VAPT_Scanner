@@ -258,9 +258,11 @@ LOGGING = {
             "maxBytes": 100000,
             "backupCount": 1,
         },
+        "null": {"class": "logging.NullHandler"},
     },
     "loggers": {
         "": {"handlers": ["console", "rotate_file"], "level": "INFO"},
         "pdfminer": {"level": "CRITICAL"},
+        "django.request": {"handlers": ["null"], "level": "ERROR", "propagate": False},
     },
 }
