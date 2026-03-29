@@ -127,13 +127,13 @@ def xml_parser(root, project_id, scan_id, request=None, organization=None):
                     ip_address = ip.get("addr")
                     if ip_address:
                         total_ports = NmapResultDb.objects.filter(
-                            ip_address=ip_address, organization=organization
+                            scan_id=scan_id, organization=organization
                         ).count()
                         total_open_p = NmapResultDb.objects.filter(
-                            ip_address=ip_address, organization=organization, state="open"
+                            scan_id=scan_id, organization=organization, state="open"
                         ).count()
                         total_close_p = NmapResultDb.objects.filter(
-                            ip_address=ip_address, organization=organization, state="closed"
+                            scan_id=scan_id, organization=organization, state="closed"
                         ).count()
 
                         NmapScanDb.objects.filter(
