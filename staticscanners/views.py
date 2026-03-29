@@ -76,11 +76,18 @@ class SastScanVulnInfo(APIView):
         # all_notify =
         Notification.objects.unread()
         if uu_id is None:
-            scan_id = request.GET["scan_id"]
-            scan_name = request.GET["scan_name"]
-            vuln_data = StaticScanResultsDb.objects.filter(
-                scan_id=scan_id, title=scan_name, organization=request.user.organization
-            )
+            scan_id = request.GET.get("scan_id")
+            scan_name = request.GET.get("scan_name")  # optional — None when View clicked from scan list
+            if scan_id and scan_name:
+                vuln_data = StaticScanResultsDb.objects.filter(
+                    scan_id=scan_id, title=scan_name, organization=request.user.organization
+                )
+            elif scan_id:
+                vuln_data = StaticScanResultsDb.objects.filter(
+                    scan_id=scan_id, organization=request.user.organization
+                )
+            else:
+                vuln_data = StaticScanResultsDb.objects.none()
         else:
             try:
                 vuln_data = StaticScanResultsDb.objects.filter(
