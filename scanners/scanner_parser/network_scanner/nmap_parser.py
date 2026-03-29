@@ -3,47 +3,21 @@
 
 from __future__ import print_function
 
-import datetime
-import hashlib
-import uuid
 from vaptapi.models import OrgAPIKey
 from tools.models import NmapResultDb, NmapScanDb
-
-ip_address = None
-port = None
-protocol = None
-used_state = None
-used_portid = None
-used_proto = None
-state = None
-reason = None
-reason_ttl = None
-version = None
-extrainfo = None
-name = None
-conf = None
-method = None
-cpe = None
-type_p = None
-osfamily = None
-vendor = None
-osgen = None
-accuracy = None
 
 
 def xml_parser(root, project_id, scan_id, request=None, organization=None):
     """
+    Parse nmap XML output and save results to the database.
 
-    :param root:
-    :param project_id:
-    :param scan_id:
-    :param request: HTTP request (optional — not needed when called from background thread)
+    :param root: ElementTree root of the nmap XML
+    :param project_id: project UUID string (unused, kept for API compat)
+    :param scan_id: UUID for this scan
+    :param request: HTTP request (optional — not needed from background thread)
     :param organization: Organization object (required when request is None)
-    :return:
     """
-    global ip_address, port, protocol, used_state, used_portid, used_proto, state, reason, reason_ttl, version, extrainfo, name, conf, method, cpe, type_p, osfamily, vendor, osgen, accuracy
-
-    # Resolve organization — either passed directly (background thread) or from request
+    # Resolve organization from request if not passed directly
     if organization is None:
         api_key = request.META.get("HTTP_X_API_KEY")
         key_object = OrgAPIKey.objects.filter(api_key=api_key).first()
@@ -51,150 +25,125 @@ def xml_parser(root, project_id, scan_id, request=None, organization=None):
             organization = key_object.organization
         else:
             organization = request.user.organization
-    
+
+    ip_address = None
+    used_state = used_portid = used_proto = None
+
+    # ── Pass 1: save one NmapResultDb row per actual port ──────────────────
     for nmap in root:
         for scaninfo in nmap:
+
+            # Extract IPv4 address
             if scaninfo.tag == "address":
                 ip = scaninfo.attrib
-                for key, value in ip.items():
-                    if key == "addrtype":
-                        if value == "ipv4":
-                            for key, value in ip.items():
-                                if key == "addr":
-                                    ip_address = value
+                if ip.get("addrtype") == "ipv4":
+                    ip_address = ip.get("addr")
+
+            # Extract portused (OS detection used port)
+            if scaninfo.tag == "portused":
+                for key, value in scaninfo.attrib.items():
+                    if key == "state":
+                        used_state = value
+                    elif key == "portid":
+                        used_portid = value
+                    elif key == "proto":
+                        used_proto = value
+
+            # Only iterate ports container
+            if scaninfo.tag != "ports":
+                continue
+
             for s in scaninfo:
-                # print s.tag
-                if s.tag == "port":
-                    p = s.attrib
-                    for key, value in p.items():
-                        # print key
-                        if key == "portid":
-                            port = value
-                            print(port)
-                        if key == "protocol":
-                            protocol = value
+                if s.tag != "port":
+                    continue
 
-                if s.tag == "portused":
-                    p = s.attrib
-                    for key, value in p.items():
-                        # print key, value
-                        if key == "state":
-                            used_state = value
-                        if key == "portid":
-                            used_portid = value
-                        if key == "proto":
-                            used_proto = value
+                # Reset all per-port variables for each port entry
+                port = protocol = state = reason = reason_ttl = None
+                version = extrainfo = name = conf = method = None
+                type_p = osfamily = vendor = osgen = accuracy = cpe = None
 
+                # Port number and protocol from attributes
+                port = s.attrib.get("portid")
+                protocol = s.attrib.get("protocol")
+
+                print(f"[nmap_parser] port={port} proto={protocol}")
+
+                # Parse child elements: state, service, script, cpe
                 for ss in s:
-                    sat = ss.attrib
-                    for key, value in sat.items():
-                        if key == "state":
-                            state = value
-                        if key == "reason":
-                            reason = value
-                        if key == "reason_ttl":
-                            reason_ttl = value
-                        if key == "version":
-                            version = value
-                        if key == "extrainfo":
-                            extrainfo = value
-                        if key == "name":
-                            name = value
-                        if key == "conf":
-                            conf = value
-                        if key == "method":
-                            method = value
-                        if key == "type":
-                            type_p = value
-                        if key == "osfamily":
-                            osfamily = value
-                        if key == "vendor":
-                            vendor = value
-                        if key == "osgen":
-                            osgen = value
-                        if key == "accuracy":
-                            accuracy = value
+                    if ss.tag == "state":
+                        state = ss.attrib.get("state")
+                        reason = ss.attrib.get("reason")
+                        reason_ttl = ss.attrib.get("reason_ttl")
 
-                    for sss in ss:
-                        cpe = sss.text
-                # print(ip_address)
-                print("------")
+                    elif ss.tag == "service":
+                        name = ss.attrib.get("name")
+                        version = ss.attrib.get("version")
+                        extrainfo = ss.attrib.get("extrainfo")
+                        conf = ss.attrib.get("conf")
+                        method = ss.attrib.get("method")
+                        type_p = ss.attrib.get("type")
+                        osfamily = ss.attrib.get("osfamily")
+                        vendor = ss.attrib.get("vendor")
+                        osgen = ss.attrib.get("osgen")
+                        accuracy = ss.attrib.get("accuracy")
+                        # CPE is a child of service
+                        for cpe_el in ss:
+                            if cpe_el.tag == "cpe":
+                                cpe = cpe_el.text
 
-                dump_data = NmapResultDb(
-                    scan_id=scan_id,
-                    ip_address=ip_address,
-                    port=port,
-                    state=state,
-                    reason=reason,
-                    reason_ttl=reason_ttl,
-                    version=version,
-                    extrainfo=extrainfo,
-                    name=name,
-                    conf=conf,
-                    method=method,
-                    type_p=type_p,
-                    osfamily=osfamily,
-                    vendor=vendor,
-                    osgen=osgen,
-                    accuracy=accuracy,
-                    cpe=cpe,
-                    used_state=used_state,
-                    used_portid=used_portid,
-                    used_proto=used_proto,
-                    organization=organization,
-                )
-                dump_data.save()
+                # Only save if we have a real port number
+                if port:
+                    NmapResultDb(
+                        scan_id=scan_id,
+                        ip_address=ip_address,
+                        port=port,
+                        protocol=protocol,
+                        state=state,
+                        reason=reason,
+                        reason_ttl=reason_ttl,
+                        version=version,
+                        extrainfo=extrainfo,
+                        name=name,
+                        conf=conf,
+                        method=method,
+                        type_p=type_p,
+                        osfamily=osfamily,
+                        vendor=vendor,
+                        osgen=osgen,
+                        accuracy=accuracy,
+                        cpe=cpe,
+                        used_state=used_state,
+                        used_portid=used_portid,
+                        used_proto=used_proto,
+                        organization=organization,
+                    ).save()
 
+    # ── Pass 2: update NmapScanDb with port counts ──────────────────────────
     for nmap in root:
         for scaninfo in nmap:
-            # print scaninfo.tag, scaninfo.attrib
             if scaninfo.tag == "address":
                 ip = scaninfo.attrib
-                for key, value in ip.items():
-                    if key == "addrtype":
-                        if value == "ipv4":
-                            for key, value in ip.items():
-                                if key == "addr":
-                                    ip_address = value
+                if ip.get("addrtype") == "ipv4":
+                    ip_address = ip.get("addr")
+                    if ip_address:
+                        total_ports = NmapResultDb.objects.filter(
+                            ip_address=ip_address, organization=organization
+                        ).count()
+                        total_open_p = NmapResultDb.objects.filter(
+                            ip_address=ip_address, organization=organization, state="open"
+                        ).count()
+                        total_close_p = NmapResultDb.objects.filter(
+                            ip_address=ip_address, organization=organization, state="closed"
+                        ).count()
 
-                                    all_data = NmapResultDb.objects.filter(
-                                        ip_address=ip_address,
-                                        organization=organization,
-                                    )
-                                    # for a in all_data:
-                                    #     global total_ports, ports_p
-                                    #     ports_p = a.port
-                                    total_ports = len(all_data)
-                                    # print(total_ports)
-
-                                    all_open_p = NmapResultDb.objects.filter(
-                                        ip_address=ip_address,
-                                        organization=organization,
-                                        state="open",
-                                    )
-                                    # for p in all_open_p:
-                                    #     global total_open_p
-                                    total_open_p = len(all_open_p)
-                                    # print(total_open_p)
-
-                                    all_close_p = NmapResultDb.objects.filter(
-                                        ip_address=ip_address,
-                                        organization=organization,
-                                        state="closed",
-                                    )
-                                    total_close_p = len(all_close_p)
-
-                                    # UPDATE the existing NmapScanDb record created by _run_nmap
-                                    # (instead of INSERTing a duplicate with a bad project_id UUID)
-                                    NmapScanDb.objects.filter(
-                                        scan_id=scan_id,
-                                        organization=organization,
-                                    ).update(
-                                        scan_ip=ip_address,
-                                        total_ports=total_ports,
-                                        total_open_ports=total_open_p,
-                                        total_close_ports=total_close_p,
-                                    )
+                        NmapScanDb.objects.filter(
+                            scan_id=scan_id, organization=organization
+                        ).update(
+                            scan_ip=ip_address,
+                            total_ports=total_ports,
+                            total_open_ports=total_open_p,
+                            total_close_ports=total_close_p,
+                        )
 
 
 parser_header_dict = {}
