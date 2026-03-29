@@ -1,0 +1,149 @@
+{% extends 'dashboard/base.html' %}
+
+{% block body %}
+<div class="row mb-3">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-shield-alt mr-2 text-primary"></i>Static Analysis — Vulnerability Details
+                    </h5>
+                    <a href="javascript:history.back()" class="btn btn-sm btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Back to Scans
+                    </a>
+                </div>
+
+                <!-- Summary strip -->
+                <div class="row text-center mb-3">
+                    <div class="col-md-3">
+                        <div class="card border-0 shadow-sm p-3">
+                            <h4 class="text-dark mb-0">{{ vuln_data|length }}</h4>
+                            <small class="text-muted">Total Findings</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card border-0 shadow-sm p-3">
+                            <h4 class="text-danger mb-0">
+                                {% with count=0 %}
+                                {% for v in vuln_data %}{% if v.severity == "High" or v.severity == "high" or v.severity == "CRITICAL" or v.severity == "Critical" %}{% endif %}{% endfor %}
+                                {% endwith %}
+                                {{ vuln_data|length }}
+                            </h4>
+                            <small class="text-muted">Issues Found</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card border-0 shadow-sm p-3">
+                            <h4 class="text-info mb-0">Bandit / Semgrep</h4>
+                            <small class="text-muted">Scanner</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card border-0 shadow-sm p-3">
+                            <h4 class="text-success mb-0">Completed</h4>
+                            <small class="text-muted">Status</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th>#</th>
+                                <th>Title</th>
+                                <th>Severity</th>
+                                <th>File</th>
+                                <th>Scanner</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for vuln in vuln_data %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td>
+                                    <strong>{{ vuln.title|default:"—" }}</strong>
+                                    {% if vuln.description %}
+                                    <br><small class="text-muted">{{ vuln.description|truncatechars:100 }}</small>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if vuln.severity == "Critical" or vuln.severity == "CRITICAL" %}
+                                        <span class="badge badge-danger">Critical</span>
+                                    {% elif vuln.severity == "High" or vuln.severity == "HIGH" %}
+                                        <span class="badge badge-danger">High</span>
+                                    {% elif vuln.severity == "Medium" or vuln.severity == "MEDIUM" %}
+                                        <span class="badge badge-warning">Medium</span>
+                                    {% elif vuln.severity == "Low" or vuln.severity == "LOW" %}
+                                        <span class="badge badge-info">Low</span>
+                                    {% else %}
+                                        <span class="badge badge-secondary">{{ vuln.severity|default:"Info" }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if vuln.filePath %}
+                                        <code style="font-size:11px;">{{ vuln.filePath }}</code>
+                                    {% elif vuln.fileName %}
+                                        <code style="font-size:11px;">{{ vuln.fileName }}</code>
+                                    {% else %}
+                                        <span class="text-muted">—</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if vuln.scanner %}
+                                        <span class="badge badge-dark">{{ vuln.scanner }}</span>
+                                    {% else %}
+                                        <span class="text-muted">—</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if vuln.vuln_status == "Closed" %}
+                                        <span class="badge badge-success">Closed</span>
+                                    {% elif vuln.false_positive == "Yes" %}
+                                        <span class="badge badge-secondary">False Positive</span>
+                                    {% else %}
+                                        <span class="badge badge-warning">Open</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if vuln.date_time %}
+                                        {{ vuln.date_time|date:"Y-m-d H:i" }}
+                                    {% else %}
+                                        <span class="text-muted">—</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+
+                            <!-- Expandable detail row -->
+                            {% if vuln.solution or vuln.references %}
+                            <tr class="bg-light">
+                                <td colspan="7">
+                                    {% if vuln.solution %}
+                                    <strong>Solution:</strong> {{ vuln.solution }}<br>
+                                    {% endif %}
+                                    {% if vuln.references %}
+                                    <strong>References:</strong> <a href="{{ vuln.references }}" target="_blank">{{ vuln.references|truncatechars:80 }}</a>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endif %}
+                            {% empty %}
+                            <tr>
+                                <td colspan="7" class="text-center text-muted py-4">
+                                    <i class="fas fa-check-circle text-success mr-2"></i>
+                                    No vulnerabilities found for this scan.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
