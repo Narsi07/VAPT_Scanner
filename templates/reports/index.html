@@ -1,0 +1,108 @@
+{% extends 'dashboard/base.html' %}
+
+{% block body %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <h4 class="mb-1"><i class="fas fa-file-alt mr-2 text-primary"></i>Generate Report</h4>
+        <p class="text-muted mb-0">Export your scan results as CSV or Excel</p>
+    </div>
+</div>
+
+<!-- Summary Cards -->
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card border-left-primary shadow-sm h-100">
+            <div class="card-body d-flex align-items-center">
+                <i class="fas fa-network-wired fa-2x text-primary mr-3"></i>
+                <div>
+                    <div class="text-xs text-muted font-weight-bold">Nmap Scans</div>
+                    <div class="h4 mb-0 font-weight-bold">{{ nmap_count }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-left-warning shadow-sm h-100">
+            <div class="card-body d-flex align-items-center">
+                <i class="fas fa-code fa-2x text-warning mr-3"></i>
+                <div>
+                    <div class="text-xs text-muted font-weight-bold">Static Findings</div>
+                    <div class="h4 mb-0 font-weight-bold">{{ static_count }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-left-success shadow-sm h-100">
+            <div class="card-body d-flex align-items-center">
+                <i class="fas fa-lock fa-2x text-success mr-3"></i>
+                <div>
+                    <div class="text-xs text-muted font-weight-bold">SSL Scans</div>
+                    <div class="h4 mb-0 font-weight-bold">{{ ssl_count }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Export Form -->
+<div class="row">
+    <div class="col-md-8">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title mb-3">Export Options</h5>
+
+                <div class="form-group">
+                    <label for="projectSelect"><b>Filter by Project</b></label>
+                    <select class="form-control" id="projectSelect">
+                        <option value="all">All Projects</option>
+                        {% for p in projects %}
+                        <option value="{{ p.uu_id }}">{{ p.project_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <hr>
+
+                <div class="d-flex flex-wrap" style="gap:12px;">
+                    <a id="csvBtn" href="/reports/export/csv/"
+                       class="btn btn-outline-primary">
+                        <i class="fas fa-file-csv mr-1"></i> Export as CSV
+                    </a>
+                    <a id="excelBtn" href="/reports/export/excel/"
+                       class="btn btn-success">
+                        <i class="fas fa-file-excel mr-1"></i> Export as Excel (.xlsx)
+                    </a>
+                </div>
+
+                <p class="text-muted mt-3 mb-0" style="font-size:13px;">
+                    <i class="fas fa-info-circle mr-1"></i>
+                    Report includes: Nmap Port Scan, Static Analysis, and SSL Scan results.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card shadow-sm bg-light">
+            <div class="card-body">
+                <h6 class="font-weight-bold">Report Contains</h6>
+                <ul class="list-unstyled mb-0" style="font-size:14px;">
+                    <li><i class="fas fa-check text-success mr-2"></i>Nmap Port Scan Results</li>
+                    <li><i class="fas fa-check text-success mr-2"></i>Static Code Analysis Findings</li>
+                    <li><i class="fas fa-check text-success mr-2"></i>SSL/TLS Scan Output</li>
+                    <li><i class="fas fa-times text-muted mr-2"></i>Web Scan (coming soon)</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('projectSelect').addEventListener('change', function () {
+        var pid = this.value;
+        document.getElementById('csvBtn').href = '/reports/export/csv/?project_id=' + pid;
+        document.getElementById('excelBtn').href = '/reports/export/excel/?project_id=' + pid;
+    });
+</script>
+{% endblock %}

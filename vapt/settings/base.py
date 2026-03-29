@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     "tools",
     "pentest",
     "report_upload",
+    "reports",
     "django.contrib.admin",
     "stronghold",
     "django.contrib.auth",

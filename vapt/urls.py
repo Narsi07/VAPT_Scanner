@@ -22,8 +22,10 @@ urlpatterns = [
     path("staticscanners/", include("staticscanners.urls")),
     # Tools (Nikto, SSLScan, Nmap, Nmap+Vulners)
     path("tools/", include("tools.urls")),
-    # Pentest manual activity
-    path("pentest/", include("pentest.urls")),
+    # Pentest manual activity (disabled)
+    # path("pentest/", include("pentest.urls")),
+    # Reports (CSV/Excel export)
+    path("reports/", include("reports.urls")),
     # Settings
     path("settings/", include("vaptsettings.urls")),
     # API v1 (VAPT REST API)
