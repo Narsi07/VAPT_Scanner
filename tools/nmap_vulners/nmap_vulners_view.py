@@ -2,6 +2,7 @@
 # VAPT Security Platform
 
 import threading
+import uuid
 
 from django.shortcuts import HttpResponseRedirect, render
 from notifications.signals import notify
@@ -12,7 +13,10 @@ from tools.nmap_vulners.nmap_vulners_scan import run_nmap_vulners
 
 def nmap_vulners_scan(request):
     """List all Nmap+Vulners scans."""
-    all_nmap = NmapScanDb.objects.filter(organization=request.user.organization)
+    all_nmap = NmapScanDb.objects.filter(
+        organization=request.user.organization,
+        is_vulners=True,
+    ).order_by('-created_time')
     return render(
         request, "tools/nmap_scan.html", {"all_nmap": all_nmap, "is_vulners": True}
     )
@@ -38,20 +42,30 @@ def nmap_vulners(request):
 
         if not ip_address:
             notify.send(user, recipient=user, verb="Nmap+Vulners: IP address is required")
-            return HttpResponseRedirect("/tools/nmap_scan/")
+            return HttpResponseRedirect("/tools/nmap_vuln_scan/")
+
+        # Create placeholder record BEFORE thread starts so user sees scan immediately
+        scan_id = uuid.uuid4()
+        NmapScanDb.objects.create(
+            scan_id=scan_id,
+            scan_ip=ip_address,
+            project=project,
+            organization=organization,
+            is_vulners=True,
+        )
 
         print("[VAPT] Starting Nmap+Vulners scan on", ip_address)
 
-        # Launch in background thread so browser doesn't block
+        # Launch in background thread
         t = threading.Thread(
             target=_run_nmap_vulners_background,
-            args=(ip_address, project, organization, user),
+            args=(scan_id, ip_address, project, organization, user),
             daemon=True,
         )
         t.start()
 
         notify.send(user, recipient=user, verb="Nmap+Vulners scan started for: %s" % ip_address)
-        return HttpResponseRedirect("/tools/nmap_scan/")
+        return HttpResponseRedirect("/tools/nmap_vuln_scan/")
 
     elif request.method == "GET":
         ip_address = request.GET.get("ip")
@@ -62,10 +76,11 @@ def nmap_vulners(request):
     return render(request, "tools/nmap_vulners_list.html", {"all_nmap": all_nmap})
 
 
-def _run_nmap_vulners_background(ip_address, project, organization, user):
+def _run_nmap_vulners_background(scan_id, ip_address, project, organization, user):
     """Background thread runner for Nmap+Vulners scan."""
     try:
         run_nmap_vulners(
+            scan_id=scan_id,
             ip_addr=ip_address,
             project=project,
             organization=organization,
@@ -74,6 +89,8 @@ def _run_nmap_vulners_background(ip_address, project, organization, user):
         print("[VAPT] Nmap+Vulners scan completed for", ip_address)
     except Exception as e:
         print("[VAPT] Nmap+Vulners error:", e)
+        # Mark the placeholder as failed
+        NmapScanDb.objects.filter(scan_id=scan_id).update(total_ports='0')
         notify.send(user, recipient=user, verb="Nmap+Vulners scan failed: %s — %s" % (ip_address, str(e)))
 
 

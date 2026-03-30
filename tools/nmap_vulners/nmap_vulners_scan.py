@@ -50,7 +50,7 @@ def parse_port(proto, ip_addr, host_data, scan_id, project, organization):
         nmap_obj.save()
 
 
-def run_nmap_vulners(ip_addr="", project=None, organization=None):
+def run_nmap_vulners(ip_addr="", project=None, organization=None, scan_id=None):
     if not ip_addr:
         raise ValueError("[NMAP_VULNERS] ip_addr must be specified")
 
@@ -59,7 +59,8 @@ def run_nmap_vulners(ip_addr="", project=None, organization=None):
     except ImportError:
         raise RuntimeError("[NMAP_VULNERS] python-nmap not installed. Run: pip install python-nmap")
 
-    scan_id = uuid.uuid4()
+    if scan_id is None:
+        scan_id = uuid.uuid4()
 
     nmap_vulners_path = os.path.join(
         settings.BASE_DIR, "tools/nmap_vulners/vulners.nse"
@@ -118,12 +119,23 @@ def run_nmap_vulners(ip_addr="", project=None, organization=None):
         print("[VAPT] Nmap+Vulners: %s — %d open / %d closed ports" % (
             host, total_open_p, total_close_p))
 
-        NmapScanDb(
-            scan_id=scan_id,
-            project=project,
+        # Update the existing placeholder record (created before scan started)
+        updated = NmapScanDb.objects.filter(scan_id=scan_id).update(
             scan_ip=host,
+            project=project,
             total_ports=total_ports,
             total_open_ports=total_open_p,
             total_close_ports=total_close_p,
-            organization=organization,
-        ).save()
+        )
+        # If no placeholder existed (e.g. called directly), create it
+        if not updated:
+            NmapScanDb(
+                scan_id=scan_id,
+                project=project,
+                scan_ip=host,
+                total_ports=total_ports,
+                total_open_ports=total_open_p,
+                total_close_ports=total_close_p,
+                organization=organization,
+                is_vulners=True,
+            ).save()

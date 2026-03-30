@@ -136,6 +136,7 @@ class NmapScanDb(models.Model):
         related_name="nmap_result_db_updated",
     )
     is_active = models.BooleanField(default=True)
+    is_vulners = models.BooleanField(default=False)
     organization = models.ForeignKey(Organization, on_delete=models.CASCADE, default=1)
 
 
