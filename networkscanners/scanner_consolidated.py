@@ -3,9 +3,12 @@
 # Consolidated Network Scanners (Nmap, OpenVAS, Nmap-Vulners)
 
 import json
+import os
 import threading
 import uuid
 from datetime import datetime
+
+from django.conf import settings
 
 from django.http import JsonResponse
 from django.shortcuts import render
@@ -101,10 +104,10 @@ class NmapNetworkScannerView(APIView):
             
             # Execute scan
             nm.scan(hosts=target, arguments=scan_type)
-            
-            # Save results
+
+            # Use full scan result (preserves service/version/script data)
             scan.scan_status = 'Completed'
-            scan.raw_data = json.dumps(nm.csv())
+            scan.raw_data = json.dumps(nm._scan_result)
             scan.save()
             
             notify.send(
@@ -114,9 +117,13 @@ class NmapNetworkScannerView(APIView):
             )
             
         except Exception as e:
-            scan = NetworkScansDb.objects.get(scan_id=scan_id)
-            scan.scan_status = 'Error'
-            scan.save()
+            try:
+                scan = NetworkScansDb.objects.get(scan_id=scan_id)
+                scan.scan_status = 'Error'
+                scan.raw_data = json.dumps({'error': str(e)})
+                scan.save()
+            except Exception:
+                pass
             notify.send(user, recipient=user, verb=f"Nmap scan failed: {str(e)}")
 
 
@@ -271,17 +278,30 @@ class NmapVulnersScannerView(APIView):
             
             scan = NetworkScansDb.objects.get(scan_id=scan_id)
             nm = nmap.PortScanner()
-            
-            # Nmap with Vulners script
-            nm.scan(hosts=target, arguments='-sV --script vuln')
-            
+
+            # Use bundled vulners.nse (avoids needing system-wide install)
+            vulners_nse = os.path.join(
+                settings.BASE_DIR, 'tools', 'nmap_vulners', 'vulners.nse'
+            )
+            nmap_args = f'-sV -Pn -T4 --max-retries 1 --host-timeout 300s --script {vulners_nse}'
+            print(f'[VAPT] Nmap-Vulners args: {nmap_args}')
+
+            nm.scan(hosts=target, arguments=nmap_args)
+
+            # Store full JSON result — preserves NSE/CVE output from vulners
             scan.scan_status = 'Completed'
-            scan.raw_data = json.dumps(nm.csv())
+            scan.raw_data = json.dumps(nm._scan_result)
             scan.save()
-            
-            notify.send(user, recipient=user, verb=f"Nmap-Vulners scan completed for {target}")
-            
+
+            notify.send(user, recipient=user, verb=f'Nmap-Vulners scan completed for {target}')
+
         except Exception as e:
-            scan = NetworkScansDb.objects.get(scan_id=scan_id)
-            scan.scan_status = 'Error'
-            scan.save()
+            print(f'[VAPT] Nmap-Vulners error: {e}')
+            try:
+                scan = NetworkScansDb.objects.get(scan_id=scan_id)
+                scan.scan_status = 'Error'
+                scan.raw_data = json.dumps({'error': str(e)})
+                scan.save()
+            except Exception:
+                pass
+            notify.send(user, recipient=user, verb=f'Nmap-Vulners scan failed: {str(e)}')
