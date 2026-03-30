@@ -473,8 +473,10 @@ class NmapScan(APIView):
     permission_classes = (IsAuthenticated,)
 
     def get(self, request):
-        all_nmap = NmapScanDb.objects.filter(organization=request.user.organization)
-
+        all_nmap = NmapScanDb.objects.filter(
+            organization=request.user.organization,
+            is_vulners=False,
+        )
         return render(request, "tools/nmap_scan.html", {"all_nmap": all_nmap})
 
 

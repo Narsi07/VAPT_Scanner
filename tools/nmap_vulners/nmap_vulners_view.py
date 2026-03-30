@@ -42,7 +42,7 @@ def nmap_vulners(request):
 
         if not ip_address:
             notify.send(user, recipient=user, verb="Nmap+Vulners: IP address is required")
-            return HttpResponseRedirect("/tools/nmap_vuln_scan/")
+            return HttpResponseRedirect("/tools/nmap_vulners_scan/")
 
         # Create placeholder record BEFORE thread starts so user sees scan immediately
         scan_id = uuid.uuid4()
@@ -65,7 +65,7 @@ def nmap_vulners(request):
         t.start()
 
         notify.send(user, recipient=user, verb="Nmap+Vulners scan started for: %s" % ip_address)
-        return HttpResponseRedirect("/tools/nmap_vuln_scan/")
+        return HttpResponseRedirect("/tools/nmap_vulners_scan/")
 
     elif request.method == "GET":
         ip_address = request.GET.get("ip")
