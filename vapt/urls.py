@@ -35,8 +35,6 @@ urlpatterns = [
     path("auth/", include("authentication.urls")),
     # User management
     path("users/", include("user_management.urls")),
-    # Report upload (fallback manual import)
-    path("report-upload/", include("report_upload.urls")),
     # JIRA ticketing integration
     path("jira/", include("jiraticketing.urls")),
     # Notifications

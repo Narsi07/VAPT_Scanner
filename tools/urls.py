@@ -12,13 +12,7 @@ urlpatterns = [
     path("sslscanlaunch/", views.SslScanLaunch.as_view(), name="sslscanlaunch"),
     path("sslscanresult/", views.SslScanResult.as_view(), name="sslscanresult"),
     path("sslscan_delete/", views.SslScanDelete.as_view(), name="sslscan_delete"),
-    # Nikto scanning — template uses 'tools:nikto'
-    path("nikto/", views.NiktoScanList.as_view(), name="nikto"),
-    path("niktolaunch/", views.NiktoScanLaunch.as_view(), name="niktolaunch"),
-    path("niktoresult/", views.NiktoScanResult.as_view(), name="niktoresult"),
-    path("nikto_vuln/", views.NiktoResultVuln.as_view(), name="nikto_vuln"),
-    path("nikto_vuln_delete/", views.NiktoVulnDelete.as_view(), name="nikto_vuln_delete"),
-    path("nikto_scan_delete/", views.NiktoScanDelete.as_view(), name="nikto_scan_delete"),
+
     # Nmap — template uses 'tools:nmap' and 'tools:nmap_scan'
     path("nmap/", views.Nmap.as_view(), name="nmap"),
     path("nmap_scan/", views.NmapScan.as_view(), name="nmap_scan"),

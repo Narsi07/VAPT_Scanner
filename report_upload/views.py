@@ -36,7 +36,7 @@ from networkscanners.models import NetworkScanDb
 from projects.models import ProjectDb
 from scanners.scanner_parser import scanner_parser
 from staticscanners.models import StaticScansDb
-from tools.models import NiktoResultDb
+
 from user_management import permissions
 from webscanners.models import WebScansDb
 
@@ -178,15 +178,7 @@ class Upload(APIView):
                         organization=request.user.organization,
                     )
             # Store to database - custom types
-            elif db_type == "NiktoResult":
-                returnpage = "tools:nikto"
-                scan_dump = NiktoResultDb(
-                    date_time=date_time,
-                    scan_url=target,
-                    scan_id=scan_id,
-                    project_id=project_id,
-                    organization=request.user.organization,
-                )
+
             elif db_type == "InspecScan":
                 returnpage = "inspec:inspec_list"
                 scan_dump = InspecScanDb(

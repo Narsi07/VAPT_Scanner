@@ -53,7 +53,7 @@ from projects.serializers import (ProjectCreateSerializers,
 from scanners.scanner_parser import scanner_parser
 OpenVas_Parser = None
 from staticscanners.models import StaticScanResultsDb, StaticScansDb
-from tools.models import NiktoResultDb
+
 from user_management import permissions
 from user_management.models import Organization, UserProfile
 from webscanners.models import WebScanResultsDb, WebScansDb
@@ -372,13 +372,7 @@ class UploadScanResult(APIView):
                     scanner=db_name,
                 )
         # Store to database - custom types
-        elif db_type == "NiktoResult":
-            custom_return = True
-            scan_dump = NiktoResultDb(
-                scan_url=scan_url,
-                scan_id=scan_id,
-                project_id=project_id,
-            )
+
         elif db_type == "InspecScan":
             if not COMPLIANCE_AVAILABLE:
                 return Response({"error": "Compliance module not available"}, status=status.HTTP_501_NOT_IMPLEMENTED)

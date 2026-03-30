@@ -16,16 +16,7 @@
             </div>
         </div>
     </div>
-    <div class="col-md-6 col-lg-2 col-xlg-3">
-        <div class="card card-hover">
-            <div class="box bg-warning text-center">
-                <h1 class="font-light text-white">{{ false_count_project.total_false__sum }}</h1>
-                <a href="{% url 'dashboard:all_high_vuln' %}?project_id=none&severity=All_False_Positive">
-                    <h6 class="text-white">False Positive</h6>
-                </a>
-            </div>
-        </div>
-    </div>
+
     <div class="col-md-6 col-lg-2 col-xlg-3">
         <div class="card card-hover">
             <div class="box bg-cyan text-center">
@@ -41,7 +32,7 @@
             <div class="box bg-info text-center">
                 <h1 class="font-light text-white">{{ net_count_project.total_net__sum }}</h1>
                 <a href="{% url 'dashboard:all_high_vuln' %}?project_id=none&severity=Network">
-                    <h6 class="text-white">Infrastructure Issues</h6>
+                    <h6 class="text-white">Network Issues</h6>
                 </a>
             </div>
         </div>
@@ -103,11 +94,7 @@
         <div class="card">
             <div class="card-body">
                 <div class="float-right">
-                    {% if user.is_superuser == True or user.role.id == 2 %}
-                    <a href="{% url 'report_upload:upload' %}" class="btn btn-primary btn-mini mr-1">
-                        <i class="fas fa-upload"></i> Upload
-                    </a>
-                    {% endif %}
+
                     {% if user.is_superuser == True %}
                     <a href="{% url 'projects:project_create' %}" class="btn btn-primary btn-mini">
                         <i class="fas fa-plus-circle"></i> Add Project
