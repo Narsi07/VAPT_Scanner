@@ -76,11 +76,7 @@
                             <input name="optradio3" type="checkbox"><span>SSLScan</span>
                         </label>
                     </div>
-                    <div class="checkbox inline checkbox-slider--b-flat checkbox-slider--b" style="width: 200px;">
-                        <label>
-                            <input name="optradio4" type="checkbox"><span>Nikto</span>
-                        </label>
-                    </div>
+
                 </div>
             </div>
         </div>
@@ -158,22 +154,7 @@
                 }
             });
         }
-        if ($('[name="optradio4"]').is(':checked')) {
-            opt = true;
-            $.ajax({
-                type: 'POST',
-                url: '{% url "tools:niktolaunch" %}',
-                data: {
 
-                    scan_url: $('#url').val(),
-                    project_id: $('#project_id').val(),
-                    csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val()
-                },
-                sucess: function () {
-
-                }
-            });
-        }
 
         if (opt) {
             $('#status').text('Scan launched.').css({ 'color': '#5bb75b', 'margin-left': '200px' });

@@ -49,9 +49,7 @@
                     <button class="btn-toggle active" onclick="showPanel('zap', this)">
                         <i class="fas fa-bolt mr-1"></i> ZAP Results
                     </button>
-                    <button class="btn-toggle" onclick="showPanel('nikto', this)">
-                        <i class="fas fa-spider mr-1"></i> Nikto Results
-                    </button>
+
                     <button class="btn-toggle" onclick="showPanel('ssl', this)">
                         <i class="fas fa-lock mr-1"></i> SSLScan Results
                     </button>
@@ -72,25 +70,6 @@
                                 URL, status, vulnerability counts per severity.</p>
                             <a href="{% url 'webscanners:list_scans' %}" class="btn btn-outline-primary">
                                 <i class="fas fa-external-link-alt mr-1"></i> Open Full ZAP Results Table
-                            </a>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Nikto Panel -->
-                <div id="panel-nikto" class="scanner-panel">
-                    <div class="card border-0 shadow-sm">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                <h5 class="mb-0"><i class="fas fa-spider mr-2 text-warning"></i> Nikto Scan Results</h5>
-                                <a href="{% url 'tools:nikto' %}" class="btn btn-sm btn-primary">
-                                    <i class="fas fa-rocket mr-1"></i> New Nikto Scan
-                                </a>
-                            </div>
-                            <p class="text-muted small">Web server scan results from Nikto. Includes detected issues,
-                                server info, and vulnerability checks.</p>
-                            <a href="{% url 'tools:niktoresult' %}" class="btn btn-outline-primary">
-                                <i class="fas fa-external-link-alt mr-1"></i> Open Full Nikto Results Table
                             </a>
                         </div>
                     </div>
