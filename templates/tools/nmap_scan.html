@@ -57,7 +57,7 @@
                                         {% endif %}
                                     </td>
                                     <td style="min-width:120px">
-                                        {% if data.scan_status == 'Completed' %}
+                                        {% if data.total_ports %}
                                         <div class="progress mb-1" style="height:14px;border-radius:4px">
                                             <div class="progress-bar bg-success" role="progressbar" style="width:100%"
                                                 aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
@@ -78,7 +78,7 @@
                                     </td>
                                     <td>
                                         {% if is_vulners %}
-                                            {% if data.scan_status == 'Completed' %}
+                                            {% if data.total_ports %}
                                             <a href="/tools/nmap_vulners/?ip={{ data.scan_ip }}"
                                                 class="btn btn-xs btn-warning mr-1">
                                                 <i class="fas fa-bug"></i> View CVEs
