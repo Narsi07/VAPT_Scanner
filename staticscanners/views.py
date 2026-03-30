@@ -443,7 +443,7 @@ class BanditScanLaunch(APIView):
         return render(
             request,
             "staticscanners/scans/list_scans.html",
-            {"all_scans": all_scans, "all_projects": all_projects, "message": all_notify, "scanner": "Bandit"},
+            {"all_scans": all_scans, "all_projects": all_projects, "message": all_notify, "scanner": "Bandit", "is_launch_page": True},
         )
 
     def post(self, request):
@@ -584,7 +584,7 @@ class SemgrepScanLaunch(APIView):
         return render(
             request,
             "staticscanners/scans/list_scans.html",
-            {"all_scans": all_scans, "all_projects": all_projects, "message": all_notify, "scanner": "Semgrep"},
+            {"all_scans": all_scans, "all_projects": all_projects, "message": all_notify, "scanner": "Semgrep", "is_launch_page": True},
         )
 
     def post(self, request):
