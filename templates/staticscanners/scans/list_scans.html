@@ -9,7 +9,16 @@
                 <div class="float-right">
                     {% if user.is_superuser == True or user.role.id == 2 %}
                     <div class="btn-group" role="group">
-                        <!-- Launch options moved to Unified SAST Hub -->
+                        <!-- Launch Bandit Scan -->
+                        <button type="button" class="btn btn-success btn-mini" data-toggle="modal"
+                            data-target="#banditScanModal">
+                            <i class="fas fa-bug"></i> Launch Bandit Scan
+                        </button>
+                        <!-- Launch Semgrep Scan -->
+                        <button type="button" class="btn btn-info btn-mini" data-toggle="modal"
+                            data-target="#semgrepScanModal">
+                            <i class="fas fa-code"></i> Launch Semgrep Scan
+                        </button>
                         <button type="button" class="btn btn-danger btn-mini">Delete Selected</button>
                     </div>
                     {% endif %}
@@ -93,6 +102,81 @@
     </div>
 </div>
 
+<!-- Bandit Scan Launch Modal -->
+<div class="modal fade" id="banditScanModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-bug"></i> Launch Bandit SAST Scan</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form method="POST" action="{% url 'staticscanners:bandit_scan' %}">{% csrf_token %}
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Project</label>
+                        <select name="project_id" class="form-control" required>
+                            {% for proj in all_projects %}
+                            <option value="{{ proj.uu_id }}">{{ proj.project_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Path to Python Source</label>
+                        <input type="text" name="scan_path" class="form-control"
+                            placeholder="/path/to/your/python/project" required>
+                        <small class="form-text text-muted">Absolute path to directory or file on the server.</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-play"></i> Start Scan
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
+<!-- Semgrep Scan Launch Modal -->
+<div class="modal fade" id="semgrepScanModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-code"></i> Launch Semgrep SAST Scan</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form method="POST" action="{% url 'staticscanners:semgrep_scan' %}">{% csrf_token %}
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Project</label>
+                        <select name="project_id" class="form-control" required>
+                            {% for proj in all_projects %}
+                            <option value="{{ proj.uu_id }}">{{ proj.project_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Path to Source Code</label>
+                        <input type="text" name="scan_path" class="form-control" placeholder="/path/to/your/source/code"
+                            required>
+                        <small class="form-text text-muted">Absolute path to directory on the server. Semgrep supports
+                            most languages.</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-info">
+                        <i class="fas fa-play"></i> Start Scan
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
 {% endblock %}
