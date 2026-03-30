@@ -2,7 +2,6 @@
 # VAPT Security Platform
 
 import threading
-from itertools import starmap
 
 from django.shortcuts import HttpResponseRedirect, render
 from notifications.signals import notify
@@ -86,14 +85,20 @@ def nmap_vulners_port(request):
 
     port_info = NmapVulnersPortResultDb.objects.filter(ip_address=ip_address, port=port)
 
-    cve_info = list()
+    cve_info = []
     first = port_info.first()
     if first and first.vulners_extrainfo:
-        info = first.vulners_extrainfo.split("\n\t")[1:]
-        info_gen = starmap(lambda x: x.split("\t\t"), info)
-
-        names = ("cve", "cvss", "link")
-        cve_info = (dict(zip(names, info)) for info in info_gen)
+        for line in first.vulners_extrainfo.split("\n"):
+            line = line.strip()
+            if not line:
+                continue
+            parts = [p.strip() for p in line.split("\t") if p.strip()]
+            if len(parts) >= 2:
+                cve_info.append({
+                    "cve": parts[0],
+                    "cvss": parts[1] if len(parts) > 1 else "—",
+                    "link": parts[2] if len(parts) > 2 else "",
+                })
 
     return render(
         request,
