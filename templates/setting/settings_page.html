@@ -15,7 +15,6 @@
                     <select class="selectpicker" title="Add Connector" data-style="btn-primary" data-live-search="true"
                         onchange="location = this.value;">
                         <option class="dropdown-item" value="/zapscanner/zap_settings/">OWASP ZAP</option>
-                        <option class="dropdown-item" value="/networkscanners/openvas_setting/">OpenVAS</option>
                         <option class="dropdown-item" value="/jira/jira_setting/">JIRA</option>
                     </select>
                 </div>
@@ -65,35 +64,7 @@
                                         </div>
                                     </td>
                                 </tr>
-                                {% elif data.setting_scanner == 'Openvas' %}
-                                <tr>
-                                    <td>
-                                        <div class="p-1"><img src="/static/tools/openvas.png" alt="user" width="50"
-                                                class="rounded-circle" data-toggle="tooltip" data-placement="top"
-                                                title="OpenVAS">
-                                            <b><a href="/networkscanners/openvas_setting/">OpenVAS</a> </b>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        {% if data.setting_status == False %}
-                                        <span class="badge badge-pill badge-danger">Not Connected</span>
-                                        {% elif data.setting_status == True %}
-                                        <span class="badge badge-pill badge-success">Connected</span>
-                                        {% endif %}
-                                    </td>
-                                    <td>{{ data.created_time }}</td>
-                                    <td class="confirm-delete">
-                                        <div>
-                                            <form action="{% url 'vaptsettings:del_setting' %}" method="POST"
-                                                class="form-horizontal">
-                                                {% csrf_token %}
-                                                <input type="hidden" name="setting_id" value="{{ data.setting_id }}">
-                                                <button class="btn btn-danger btn-mini"><i class="fas fa-trash"></i>
-                                                </button>
-                                            </form>
-                                        </div>
-                                    </td>
-                                </tr>
+
                                 {% elif data.setting_scanner == 'Jira' %}
                                 <tr>
                                     <td>
@@ -143,12 +114,7 @@
 {% if zap_info == 'Disabled' %}
 <script>$(window).load(function () { toastr.warning('ZAP Connection Disabled'); });</script>
 {% endif %}
-{% if openvas_info == False %}
-<script>$(window).load(function () { toastr.error('OpenVAS Connection Not Found'); });</script>
-{% endif %}
-{% if openvas_info == True %}
-<script>$(window).load(function () { toastr.success('OpenVAS Connection Found'); });</script>
-{% endif %}
+
 {% if jira_info == False %}
 <script>$(window).load(function () { toastr.error('Jira Connection Not Found'); });</script>
 {% endif %}

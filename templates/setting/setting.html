@@ -84,56 +84,6 @@
         </div>
     </div>
 
-    <!-- OpenVAS Setting -->
-    <div class="col-6">
-        <div class="card">
-            <div class="card-body">
-                <div class="d-md-flex align-items-center">
-                    <h1 class="card-title">OpenVAS</h1>
-                </div>
-                <br>
-                <div class="card">
-                    <div class="card-body">
-                        <div class="form-group row">
-                            <label class="col-sm-4 col-form-label">Host</label>
-                            <div class="col-sm-6">
-                                <input type="text" readonly class="form-control-plaintext" value="{{ lod_ov_host }}"
-                                    placeholder="Enter OpenVAS Endpoint Host">
-                            </div>
-                        </div>
-                        <div class="form-group row">
-                            <label class="col-sm-4 col-form-label">Port</label>
-                            <div class="col-sm-6">
-                                <input type="text" readonly class="form-control-plaintext" value="{{ lod_ov_port }}"
-                                    placeholder="Enter OpenVAS Endpoint Port">
-                            </div>
-                        </div>
-                        <div class="form-group row">
-                            <label class="col-sm-4 col-form-label">Username</label>
-                            <div class="col-sm-6">
-                                <input type="text" readonly class="form-control-plaintext" value="{{ lod_ov_user }}">
-                            </div>
-                        </div>
-                        <div class="form-group row">
-                            <label class="col-sm-4 col-form-label">Password</label>
-                            <div class="col-sm-6">
-                                <input type="password" readonly class="form-control-plaintext"
-                                    value="{{ lod_ov_pass }}">
-                            </div>
-                        </div>
-                        <div class="form-group row">
-                            <label class="col-sm-4 col-form-label">Enabled</label>
-                            <div class="col-sm-6">
-                                <input type="text" readonly class="form-control-plaintext" value="{{ lod_ov_enabled }}">
-                            </div>
-                        </div>
-                        <a class="btn btn-primary" href="{% url 'networkscanners:openvas_setting' %}"
-                            role="button">Edit</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <!-- NMAP Vulners Setting -->
     <div class="col-6">
@@ -188,12 +138,7 @@
 {% if zap_info == 'Disabled' %}
 <script>$(window).load(function () { toastr.warning('ZAP Connection Disabled'); });</script>
 {% endif %}
-{% if openvas_info == False %}
-<script>$(window).load(function () { toastr.error('OpenVAS Connection Not Found'); });</script>
-{% endif %}
-{% if openvas_info == True %}
-<script>$(window).load(function () { toastr.success('OpenVAS Connection Found'); });</script>
-{% endif %}
+
 {% if jira_info == False %}
 <script>$(window).load(function () { toastr.error('Jira Connection Not Found'); });</script>
 {% endif %}

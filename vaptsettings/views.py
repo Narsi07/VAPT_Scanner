@@ -25,7 +25,7 @@ try:
 except Exception:
     jirasetting = None
 try:
-    from scanners.scanner_plugin.network_scanner.openvas_plugin import OpenVAS_Plugin
+    OpenVAS_Plugin = None
 except Exception:
     OpenVAS_Plugin = None
 from scanners.scanner_plugin.web_scanner import zap_plugin

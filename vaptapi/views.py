@@ -51,7 +51,7 @@ from projects.models import MonthDb, ProjectDb
 from projects.serializers import (ProjectCreateSerializers,
                                   ProjectDataSerializers)
 from scanners.scanner_parser import scanner_parser
-from scanners.scanner_parser.network_scanner import OpenVas_Parser
+OpenVas_Parser = None
 from staticscanners.models import StaticScanResultsDb, StaticScansDb
 from tools.models import NiktoResultDb
 from user_management import permissions

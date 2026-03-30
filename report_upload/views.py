@@ -35,7 +35,6 @@ except ImportError:
 from networkscanners.models import NetworkScanDb
 from projects.models import ProjectDb
 from scanners.scanner_parser import scanner_parser
-from scanners.scanner_parser.network_scanner import OpenVas_Parser
 from staticscanners.models import StaticScansDb
 from tools.models import NiktoResultDb
 from user_management import permissions
@@ -165,33 +164,8 @@ class Upload(APIView):
                     )
                 elif db_type == "NetworkScan":
                     returnpage = "networkscanners:list_scans"
-                    # OpenVAS special case
-                    if scanner == "openvas":
-                        need_to_store = False
-                        hosts = OpenVas_Parser.get_hosts(root_xml)
-                        for host in hosts:
-                            scan_dump = NetworkScanDb(
-                                ip=host,
-                                scan_id=scan_id,
-                                date_time=date_time,
-                                project_id=project_id,
-                                scan_status=scan_status,
-                                scanner=db_name,
-                                organization=request.user.organization,
-                            )
-                            scan_dump.save()
-                    # Regular network scan case
-                    else:
-                        host = parser_dict["getHostFunction"](data)
-                        scan_dump = NetworkScanDb(
-                            ip=host,
-                            scan_id=scan_id,
-                            date_time=date_time,
-                            project_id=project_id,
-                            scan_status=scan_status,
-                            scanner=db_name,
-                            organization=request.user.organization,
-                        )
+                    # Pass – OpenVAS upload no longer supported
+                    need_to_store = False
                 elif db_type == "CloudScans":
                     returnpage = "cloudscanners:list_scans"
                     scan_dump = CloudScansDb(

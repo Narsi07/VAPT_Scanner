@@ -3,7 +3,7 @@
 
 from django.urls import include, path
 from rest_framework import routers
-from rest_framework.documentation import include_docs_urls
+# from rest_framework.documentation import include_docs_urls  # requires coreapi
 from rest_framework.urlpatterns import format_suffix_patterns
 from rest_framework_simplejwt import views as jwt_views
 
@@ -13,9 +13,7 @@ from authentication.views import (ForgotPassword, Logout,
                                   ProfilePictureUploadAPIView, ResetPassword,
                                   UpdatePassword, UserSettings)
 from jiraticketing.views import LinkJiraTicket
-from networkscanners.views import (NetworkScanList, NetworkScanVulnInfo,
-                                   OpenvasDetails, OpenvasLaunchScan,
-                                   OpenvasSetting)
+
 from projects.views import ProjectList
 from staticscanners.views import SastScanList, SastScanVulnInfo
 from user_management.views import (InviteUserAPIView, Profile, Roles,
@@ -44,14 +42,7 @@ app_name = "vaptapi"
 
 urlpatterns = [
     # path("api-auth/", include("rest_framework.urls", namespace="rest_framework")),
-    path(
-        "v1/docs/",
-        include_docs_urls(
-            title=API_TITLE,
-            description=API_DESCRIPTION,
-            public=True,
-        ),
-    ),
+    # path("v1/docs/", ...) # requires coreapi - disabled
     # Authentication API
     path("v1/", views.ApiTest.as_view(), name="api_test"),
     path("v1/auth/login/", MyTokenObtainPairView.as_view(), name="token_obtain_pair"),
@@ -96,9 +87,7 @@ urlpatterns = [
     # Web scans API endpoints
     path("v1/web-scans/", WebScanList.as_view()),
     path("v1/web-scans/<str:uu_id>/", WebScanVulnInfo.as_view()),
-    # Network scan API endpoints
-    path("v1/network-scans/", NetworkScanList.as_view()),
-    path("v1/network-scans/<str:uu_id>/", NetworkScanVulnInfo.as_view()),
+
     # Static scan API endpoints
     path("v1/sast-scans/", SastScanList.as_view()),
     path("v1/sast-scans/<str:uu_id>/", SastScanVulnInfo.as_view()),
@@ -108,10 +97,7 @@ urlpatterns = [
     path("v1/zap-scan/", ZapScan.as_view()),
     path("v1/zap-settings/", ZapSetting.as_view()),
     path("v1/zap-settings-update/", ZapSettingUpdate.as_view()),
-    # Openvas Scan
-    path("v1/openvas-scans/", OpenvasLaunchScan.as_view()),
-    path("v1/openvas-settings/", OpenvasSetting.as_view()),
-    path("v1/openvas-setting-update/", OpenvasDetails.as_view()),
+
     # All Scans
     path("v1/all-scans/", views.ListAllScanResults.as_view()),
     # Update JIRA

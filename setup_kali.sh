@@ -126,12 +126,6 @@ if ! command -v zaproxy &> /dev/null; then
     sudo apt-get install -y zaproxy
 fi
 
-# Check for gvm-tools (for OpenVAS)
-if ! pip list | grep -q gvm-tools; then
-    echo -e "${YELLOW}Installing gvm-tools for OpenVAS...${NC}"
-    pip install gvm-tools
-fi
-
 # Verify checker
 echo -e "${GREEN}Verifying installations...${NC}"
 python -c "import django; print(f'Django {django.get_version()} ✓')"

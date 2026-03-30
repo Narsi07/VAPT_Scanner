@@ -73,11 +73,6 @@
                             <input name="opt_vulners" type="checkbox"><span>Nmap + Vulners</span>
                         </label>
                     </div>
-                    <div class="checkbox inline checkbox-slider--b-flat checkbox-slider--b" style="width: 200px;">
-                        <label>
-                            <input name="opt_openvas" type="checkbox"><span>OpenVAS</span>
-                        </label>
-                    </div>
                 </div>
             </div>
         </div>
@@ -128,24 +123,9 @@
             });
         }
 
-        if ($('[name="opt_openvas"]').is(':checked')) {
-            opt = true;
-            ips.forEach(function (single_ip) {
-                $.ajax({
-                    type: 'POST',
-                    url: '{% url "networkscanners:launch_scan" %}',
-                    data: {
-                        ip_address: single_ip,
-                        project_id: project_id,
-                        csrfmiddlewaretoken: csrf
-                    }
-                });
-            });
-        }
-
         if (opt) {
-            $('#status').text('Scan launched.').css({ 'color': '#5bb75b', 'margin-left': '200px' });
-            setTimeout(function () { location.reload(); }, 5000);
+            $('#status').text('Scan launched. Redirecting...').css({ 'color': '#5bb75b', 'margin-left': '200px' });
+            setTimeout(function () { window.location.href = "{% url 'networkscanners:results_hub' %}"; }, 1500);
         } else {
             $('#status').text("The scan can't launch: no scanner selected.").css({ 'color': '#b94a48', 'margin-left': '200px' });
         }

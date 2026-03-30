@@ -49,8 +49,8 @@
                     <button class="btn-toggle active" onclick="showPanel('nmap', this)">
                         <i class="fas fa-search-location mr-1"></i> Nmap Results
                     </button>
-                    <button class="btn-toggle" onclick="showPanel('openvas', this)">
-                        <i class="fas fa-shield-alt mr-1"></i> OpenVAS / Network Results
+                    <button class="btn-toggle" onclick="showPanel('vulners', this)">
+                        <i class="fas fa-bug mr-1"></i> Nmap + Vulners Results
                     </button>
                 </div>
 
@@ -59,37 +59,31 @@
                     <div class="card border-0 shadow-sm">
                         <div class="card-body">
                             <div class="d-flex justify-content-between align-items-center mb-3">
-                                <h5 class="mb-0"><i class="fas fa-search-location mr-2 text-primary"></i> Nmap Scan
-                                    Results</h5>
-                                <a href="{% url 'tools:nmap_scan' %}" class="btn btn-sm btn-primary">
+                                <h5 class="mb-0"><i class="fas fa-search-location mr-2 text-primary"></i> Standard Nmap Port Scans</h5>
+                                <a href="{% url 'tools:nmap' %}" class="btn btn-sm btn-primary">
                                     <i class="fas fa-rocket mr-1"></i> New Nmap Scan
                                 </a>
                             </div>
-                            <p class="text-muted small">Network port discovery results from Nmap and Nmap+Vulners. Shows
-                                open ports, services, OS info and matched CVEs.</p>
-                            <a href="{% url 'tools:nmap_result' %}" class="btn btn-outline-primary">
-                                <i class="fas fa-external-link-alt mr-1"></i> Open Full Nmap Results Table
-                            </a>
+                            <div class="row">
+                                {% include 'tools/_nmap_scan_table.html' with all_nmap=nmap_scans is_vulners=False table_id='nmap_table' %}
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- OpenVAS Panel -->
-                <div id="panel-openvas" class="scanner-panel">
+                <!-- Vulners Panel -->
+                <div id="panel-vulners" class="scanner-panel">
                     <div class="card border-0 shadow-sm">
                         <div class="card-body">
                             <div class="d-flex justify-content-between align-items-center mb-3">
-                                <h5 class="mb-0"><i class="fas fa-shield-alt mr-2 text-warning"></i> OpenVAS / Network
-                                    Scan Results</h5>
-                                <a href="{% url 'networkscanners:ip_scan' %}" class="btn btn-sm btn-primary">
-                                    <i class="fas fa-rocket mr-1"></i> New Network Scan
+                                <h5 class="mb-0"><i class="fas fa-bug mr-2 text-warning"></i> Nmap + Vulners Validated Scans</h5>
+                                <a href="{% url 'tools:nmap' %}" class="btn btn-sm btn-primary">
+                                    <i class="fas fa-rocket mr-1"></i> New Nmap Vulners Scan
                                 </a>
                             </div>
-                            <p class="text-muted small">Full infrastructure vulnerability scan results from OpenVAS/GVM.
-                                Shows CVEs, CVSS scores, and remediation info.</p>
-                            <a href="{% url 'networkscanners:list_scans' %}" class="btn btn-outline-primary">
-                                <i class="fas fa-external-link-alt mr-1"></i> Open Full Network Results Table
-                            </a>
+                            <div class="row">
+                                {% include 'tools/_nmap_scan_table.html' with all_nmap=vulners_scans is_vulners=True table_id='vulners_table' %}
+                            </div>
                         </div>
                     </div>
                 </div>
