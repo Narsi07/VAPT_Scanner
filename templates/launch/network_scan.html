@@ -124,8 +124,9 @@
         }
 
         if (opt) {
-            $('#status').text('Scan launched. Redirecting...').css({ 'color': '#5bb75b', 'margin-left': '200px' });
-            setTimeout(function () { window.location.href = "{% url 'networkscanners:results_hub' %}"; }, 1500);
+            $('#status').text('Scan launched successfully. You can view progress in the Results Hub.').css({ 'color': '#5bb75b', 'margin-left': '200px' });
+            // Clear input
+            $('#ip_address').val('');
         } else {
             $('#status').text("The scan can't launch: no scanner selected.").css({ 'color': '#b94a48', 'margin-left': '200px' });
         }
