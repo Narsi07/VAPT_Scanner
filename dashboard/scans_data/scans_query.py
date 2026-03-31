@@ -824,15 +824,11 @@ def all_vuln_count_data(project_id, query):
 
         cloud_closed_vuln = _cloud_filter({"vuln_status": "Closed", "project__uu_id": project_id})
 
-        pentest_closed_vuln = PentestScanResultsDb.objects.filter(
-            vuln_status="Closed", project__uu_id=project_id
-        )
         all_data = (
             int(len(web_closed_vuln))
             + int(len(net_closed_vuln))
             + int(len(sast_closed_vuln))
             + int(len(cloud_closed_vuln))
-            + int(len(pentest_closed_vuln))
         )
 
     elif query == "Open":
@@ -848,16 +844,12 @@ def all_vuln_count_data(project_id, query):
 
         cloud_open_vuln = _cloud_filter({"vuln_status": "Open", "project__uu_id": project_id})
 
-        pentest_open_vuln = PentestScanResultsDb.objects.filter(
-            vuln_status="Open", project__uu_id=project_id
-        )
         # add your scanner name here <scannername>
         all_data = (
             int(len(web_open_vuln))
             + int(len(net_open_vuln))
             + int(len(sast_open_vuln))
             + int(len(cloud_open_vuln))
-            + int(len(pentest_open_vuln))
         )
 
     return all_data
