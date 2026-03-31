@@ -34,7 +34,6 @@ except ImportError:
     COMPLIANCE_AVAILABLE = False
 from dashboard.scans_data import scans_query
 from networkscanners.models import NetworkScanDb, NetworkScanResultsDb
-from pentest.models import PentestScanDb, PentestScanResultsDb
 from projects.models import Month, MonthDb, MonthSqlite, ProjectDb
 from staticscanners.models import StaticScanResultsDb, StaticScansDb
 from user_management import permissions
@@ -475,7 +474,6 @@ def all_high_vuln(request):
     sast_all_high = ""
     cloud_all_high = ""
     net_all_high = ""
-    pentest_all_high = ""
 
     all_notify = Notification.objects.unread()
     if request.GET["project_id"]:
@@ -507,9 +505,6 @@ def all_high_vuln(request):
         net_all_high = NetworkScanResultsDb.objects.filter(
             false_positive="No", organization=request.user.organization
         )
-        pentest_all_high = PentestScanResultsDb.objects.filter(
-            organization=request.user.organization
-        )
 
     elif severity == "All_Closed":
         web_all_high = WebScanResultsDb.objects.filter(
@@ -523,9 +518,6 @@ def all_high_vuln(request):
         )
         net_all_high = NetworkScanResultsDb.objects.filter(
             vuln_status="Closed", organization=request.user.organization
-        )
-        pentest_all_high = PentestScanResultsDb.objects.filter(
-            organization=request.user.organization
         )
 
     # add your scanner name here <scannername>
@@ -542,9 +534,6 @@ def all_high_vuln(request):
         net_all_high = NetworkScanResultsDb.objects.filter(
             false_positive="Yes", organization=request.user.organization
         )
-        pentest_all_high = PentestScanResultsDb.objects.filter(
-            organization=request.user.organization
-        )
 
     elif severity == "Network":
         net_all_high = NetworkScanResultsDb.objects.filter(
@@ -555,25 +544,16 @@ def all_high_vuln(request):
         web_all_high = WebScanResultsDb.objects.filter(
             false_positive="No", organization=request.user.organization
         )
-        pentest_all_high = PentestScanResultsDb.objects.filter(
-            pentest_type="web", organization=request.user.organization
-        )
 
     # add your scanner name here <scannername>
     elif severity == "Static":
         sast_all_high = StaticScanResultsDb.objects.filter(
             false_positive="No", organization=request.user.organization
         )
-        pentest_all_high = PentestScanResultsDb.objects.filter(
-            pentest_type="static", organization=request.user.organization
-        )
 
     elif severity == "Cloud":
         cloud_all_high = CloudScansResultsDb.objects.filter(
             false_positive="No", organization=request.user.organization
-        )
-        pentest_all_high = PentestScanResultsDb.objects.filter(
-            pentest_type="cloud", organization=request.user.organization
         )
 
     elif severity == "Critical":
@@ -601,12 +581,6 @@ def all_high_vuln(request):
             project_id=project_id,
             severity="Critical",
             false_positive="No",
-            organization=request.user.organization,
-        )
-
-        pentest_all_high = PentestScanResultsDb.objects.filter(
-            severity="Critical",
-            project_id=project_id,
             organization=request.user.organization,
         )
 
@@ -638,12 +612,6 @@ def all_high_vuln(request):
             organization=request.user.organization,
         )
 
-        pentest_all_high = PentestScanResultsDb.objects.filter(
-            severity="High",
-            project_id=project_id,
-            organization=request.user.organization,
-        )
-
     elif severity == "Medium":
         # All Medium
 
@@ -667,12 +635,6 @@ def all_high_vuln(request):
         net_all_high = NetworkScanResultsDb.objects.filter(
             project_id=project_id,
             severity="Medium",
-            organization=request.user.organization,
-        )
-
-        pentest_all_high = PentestScanResultsDb.objects.filter(
-            severity="Medium",
-            project_id=project_id,
             organization=request.user.organization,
         )
 
@@ -701,12 +663,6 @@ def all_high_vuln(request):
             organization=request.user.organization,
         )
 
-        pentest_all_high = PentestScanResultsDb.objects.filter(
-            severity="Low",
-            project_id=project_id,
-            organization=request.user.organization,
-        )
-
     elif severity == "Total":
         # add your scanner name here <scannername>
         web_all_high = WebScanResultsDb.objects.filter(
@@ -719,10 +675,6 @@ def all_high_vuln(request):
             project_id=project_id, organization=request.user.organization
         )
         net_all_high = NetworkScanResultsDb.objects.filter(
-            project_id=project_id, organization=request.user.organization
-        )
-
-        pentest_all_high = PentestScanResultsDb.objects.filter(
             project_id=project_id, organization=request.user.organization
         )
 
@@ -749,8 +701,6 @@ def all_high_vuln(request):
             organization=request.user.organization,
         )
 
-        pentest_all_high = ""
-
     elif severity == "Close":
         # add your scanner name here <scannername>
         web_all_high = WebScanResultsDb.objects.filter(
@@ -774,12 +724,6 @@ def all_high_vuln(request):
             organization=request.user.organization,
         )
 
-        pentest_all_high = PentestScanResultsDb.objects.filter(
-            project_id=project_id,
-            vuln_status="Closed",
-            organization=request.user.organization,
-        )
-
     else:
         return HttpResponseRedirect(
             reverse("dashboard:proj_data" + "?project_id=%s" % project_id)
@@ -794,7 +738,6 @@ def all_high_vuln(request):
             "sast_all_high": sast_all_high,
             "cloud_all_high": cloud_all_high,
             "net_all_high": net_all_high,
-            "pentest_all_high": pentest_all_high,
             "project_id": project_id,
             "severity": severity,
             "message": all_notify,
