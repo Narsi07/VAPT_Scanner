@@ -44,8 +44,7 @@ INSTALLED_APPS = [
     "staticscanners",
     "jiraticketing",
     "tools",
-    "pentest",
-    "report_upload",
+
     "reports",
     "django.contrib.admin",
     "stronghold",

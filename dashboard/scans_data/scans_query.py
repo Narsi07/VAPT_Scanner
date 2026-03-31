@@ -29,7 +29,6 @@ except ImportError:
     COMPLIANCE_AVAILABLE = False
 
 from networkscanners.models import NetworkScanDb, NetworkScanResultsDb
-from pentest.models import PentestScanDb, PentestScanResultsDb
 from staticscanners.models import StaticScanResultsDb, StaticScansDb
 from webscanners.models import WebScanResultsDb, WebScansDb
 
@@ -40,183 +39,15 @@ data = ""
 
 
 def all_manual_scan(project_id, query):
-    all_manual_scan = None
-    if query == "total":
-        all_manual_scan_scan = PentestScanDb.objects.filter(
-            project__uu_id=project_id,
-        ).aggregate(Sum("total_vul"))
-
-        for key, value in all_manual_scan_scan.items():
-            if value is None:
-                all_manual_scan = "0"
-            else:
-                all_manual_scan = value
-
-    elif query == "critical":
-        all_manual_scan_critical = PentestScanDb.objects.filter(
-            project__uu_id=project_id
-        ).aggregate(Sum("critical_vul"))
-
-        for key, value in all_manual_scan_critical.items():
-            if value is None:
-                all_manual_scan = "0"
-            else:
-                all_manual_scan = value
-
-    elif query == "high":
-        all_manual_scan_high = PentestScanDb.objects.filter(
-            project__uu_id=project_id
-        ).aggregate(Sum("high_vul"))
-
-        for key, value in all_manual_scan_high.items():
-            if value is None:
-                all_manual_scan = "0"
-            else:
-                all_manual_scan = value
-
-    elif query == "medium":
-        all_manual_scan_medium = PentestScanDb.objects.filter(
-            project__uu_id=project_id
-        ).aggregate(Sum("medium_vul"))
-
-        for key, value in all_manual_scan_medium.items():
-            if value is None:
-                all_manual_scan = "0"
-            else:
-                all_manual_scan = value
-
-    elif query == "low":
-        all_manual_scan_low = PentestScanDb.objects.filter(
-            project__uu_id=project_id
-        ).aggregate(Sum("low_vul"))
-
-        for key, value in all_manual_scan_low.items():
-            if value is None:
-                all_manual_scan = "0"
-            else:
-                all_manual_scan = value
-
-    return all_manual_scan
+    return 0
 
 
 def all_pentest_web(project_id, query):
-    all_pentest_web = None
-    if query == "total":
-        all_pentest_web_scan = PentestScanDb.objects.filter(
-            pentest_type="web", project__uu_id=project_id
-        ).aggregate(Sum("total_vul"))
-
-        for key, value in all_pentest_web_scan.items():
-            if value is None:
-                all_pentest_web = "0"
-            else:
-                all_pentest_web = value
-
-    elif query == "critical":
-        all_pentest_web_critical = PentestScanDb.objects.filter(
-            pentest_type="web", project__uu_id=project_id
-        ).aggregate(Sum("critical_vul"))
-
-        for key, value in all_pentest_web_critical.items():
-            if value is None:
-                all_pentest_web = "0"
-            else:
-                all_pentest_web = value
-
-    elif query == "high":
-        all_pentest_web_high = PentestScanDb.objects.filter(
-            pentest_type="web", project__uu_id=project_id
-        ).aggregate(Sum("high_vul"))
-
-        for key, value in all_pentest_web_high.items():
-            if value is None:
-                all_pentest_web = "0"
-            else:
-                all_pentest_web = value
-
-    elif query == "medium":
-        all_pentest_web_medium = PentestScanDb.objects.filter(
-            pentest_type="web", project__uu_id=project_id
-        ).aggregate(Sum("medium_vul"))
-
-        for key, value in all_pentest_web_medium.items():
-            if value is None:
-                all_pentest_web = "0"
-            else:
-                all_pentest_web = value
-
-    elif query == "low":
-        all_pentest_web_low = PentestScanDb.objects.filter(
-            pentest_type="web", project__uu_id=project_id
-        ).aggregate(Sum("low_vul"))
-
-        for key, value in all_pentest_web_low.items():
-            if value is None:
-                all_pentest_web = "0"
-            else:
-                all_pentest_web = value
-
-    return all_pentest_web
+    return 0
 
 
 def all_pentest_net(project_id, query):
-    all_pentest_net = None
-    if query == "total":
-        all_pentest_net_scan = PentestScanDb.objects.filter(
-            pentest_type="network", project__uu_id=project_id
-        ).aggregate(Sum("total_vul"))
-
-        for key, value in all_pentest_net_scan.items():
-            if value is None:
-                all_pentest_net = "0"
-            else:
-                all_pentest_net = value
-
-    elif query == "critical":
-        all_pentest_net_critical = PentestScanDb.objects.filter(
-            pentest_type="network", project__uu_id=project_id
-        ).aggregate(Sum("critical_vul"))
-
-        for key, value in all_pentest_net_critical.items():
-            if value is None:
-                all_pentest_net = "0"
-            else:
-                all_pentest_net = value
-
-    elif query == "high":
-        all_pentest_net_high = PentestScanDb.objects.filter(
-            pentest_type="network", project__uu_id=project_id
-        ).aggregate(Sum("high_vul"))
-
-        for key, value in all_pentest_net_high.items():
-            if value is None:
-                all_pentest_net = "0"
-            else:
-                all_pentest_net = value
-
-    elif query == "medium":
-        all_pentest_net_medium = PentestScanDb.objects.filter(
-            pentest_type="network", project__uu_id=project_id
-        ).aggregate(Sum("medium_vul"))
-
-        for key, value in all_pentest_net_medium.items():
-            if value is None:
-                all_pentest_net = "0"
-            else:
-                all_pentest_net = value
-
-    elif query == "low":
-        all_pentest_net_low = PentestScanDb.objects.filter(
-            pentest_type="network", project__uu_id=project_id
-        ).aggregate(Sum("low_vul"))
-
-        for key, value in all_pentest_net_low.items():
-            if value is None:
-                all_pentest_net = "0"
-            else:
-                all_pentest_net = value
-
-    return all_pentest_net
+    return 0
 
 
 def all_vuln(project_id, query):
@@ -790,16 +621,11 @@ def all_vuln_count(project_id, query):
         net_all_critical = NetworkScanResultsDb.objects.filter(
             severity="Critical", project__uu_id=project_id
         )
-
-        pentest_all_critical = PentestScanResultsDb.objects.filter(
-            severity="Critical", project__uu_id=project_id
-        )
         all_data = chain(
             web_all_critical,
             sast_all_critical,
             cloud_all_critical,
             net_all_critical,
-            pentest_all_critical,
         )
     elif query == "High":
         web_all_high = WebScanResultsDb.objects.filter(
@@ -816,16 +642,11 @@ def all_vuln_count(project_id, query):
         net_all_high = NetworkScanResultsDb.objects.filter(
             severity="High", project__uu_id=project_id
         )
-
-        pentest_all_high = PentestScanResultsDb.objects.filter(
-            severity="High", project__uu_id=project_id
-        )
         all_data = chain(
             web_all_high,
             sast_all_high,
             cloud_all_high,
             net_all_high,
-            pentest_all_high,
         )
 
     elif query == "Medium":
@@ -844,16 +665,11 @@ def all_vuln_count(project_id, query):
             severity="Medium", project__uu_id=project_id
         )
 
-        pentest_all_medium = PentestScanResultsDb.objects.filter(
-            severity="Medium", project__uu_id=project_id
-        )
-
         all_data = chain(
             web_all_medium,
             sast_all_medium,
             cloud_all_medium,
             net_all_medium,
-            pentest_all_medium,
         )
 
     elif query == "Low":
@@ -872,16 +688,11 @@ def all_vuln_count(project_id, query):
             severity="Low", project__uu_id=project_id
         )
 
-        pentest_all_low = PentestScanResultsDb.objects.filter(
-            severity="Low", project__uu_id=project_id
-        )
-
         all_data = chain(
             web_all_low,
             sast_all_low,
             cloud_all_low,
             net_all_low,
-            pentest_all_low,
         )
 
     elif query == "Total":

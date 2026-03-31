@@ -42,31 +42,41 @@ all_nmap = ""
 def _run_sslscan(scan_url, scan_id, project, user, organization):
     """Run sslscan in a background thread and save the output."""
     from tools.models import SslscanResultDb
+    print(f"[VAPT] Starting SSLScan for {scan_url} in background...")
     try:
         raw = subprocess.check_output(
             ["sslscan", "--no-colour", scan_url],
             timeout=120,
             stderr=subprocess.STDOUT,
         )
-        # Decode bytes → readable text
         output = raw.decode("utf-8", errors="replace")
         SslscanResultDb.objects.filter(scan_id=scan_id).update(
             sslscan_output=output
         )
         notify.send(user, recipient=user, verb="SSLScan Completed: %s" % scan_url)
+        print(f"[VAPT] SSLScan Completed for {scan_url}")
     except FileNotFoundError:
+        output = "[ERROR] sslscan is not installed.\n\nPlease install it on the Kali Linux host using: sudo apt-get install sslscan"
+        SslscanResultDb.objects.filter(scan_id=scan_id).update(sslscan_output=output)
+        print("[VAPT] SSLScan error: Command not found")
+    except subprocess.CalledProcessError as e:
+        # If sslscan fails (e.g., target down, no SSL), it returns a non-zero exit code.
+        # e.output still contains the console output we need to show the user!
+        output = e.output.decode("utf-8", errors="replace") if e.output else str(e)
         SslscanResultDb.objects.filter(scan_id=scan_id).update(
-            sslscan_output="[ERROR] sslscan is not installed. Run: sudo apt install sslscan"
+            sslscan_output=f"[SSLScan Warning/Error]\n{output}"
         )
+        print(f"[VAPT] SSLScan returned non-zero for {scan_url}")
     except subprocess.TimeoutExpired:
         SslscanResultDb.objects.filter(scan_id=scan_id).update(
-            sslscan_output="[ERROR] sslscan timed out after 120 seconds"
+            sslscan_output="[ERROR] sslscan timed out after 120 seconds. The host might be unresponsive or firewalled."
         )
+        print(f"[VAPT] SSLScan Timeout for {scan_url}")
     except Exception as e:
         SslscanResultDb.objects.filter(scan_id=scan_id).update(
-            sslscan_output="[ERROR] " + str(e)
+            sslscan_output="[ERROR] An unexpected error occurred:\n" + str(e)
         )
-        print("[VAPT] SSLScan error:", e)
+        print("[VAPT] SSLScan unexpected error:", e)
 
 
 
@@ -154,7 +164,7 @@ class SslScanLaunch(APIView):
                 scan_url=scans_url,
                 scan_id=scan_id,
                 project=project,
-                sslscan_output=b"[Scanning...]",
+                sslscan_output="[Scanning...]",
                 organization=request.user.organization,
             ).save()
             # Launch background thread
