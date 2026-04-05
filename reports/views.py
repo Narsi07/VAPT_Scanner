@@ -43,7 +43,15 @@ class ExportCSV(View):
 
     def get(self, request):
         org = _get_org(request)
-        project_id = request.GET.get("project_id")
+        project_uuid = request.GET.get("project_id")
+
+        # Resolve UUID → integer pk (NmapScanDb.project is a FK to ProjectDb.id)
+        project_pk = None
+        if project_uuid and project_uuid != "all":
+            try:
+                project_pk = ProjectDb.objects.get(uu_id=project_uuid, organization=org).pk
+            except ProjectDb.DoesNotExist:
+                project_pk = None
 
         response = HttpResponse(content_type="text/csv")
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -55,9 +63,9 @@ class ExportCSV(View):
         writer.writerow(["=== NMAP PORT SCAN RESULTS ==="])
         writer.writerow(["IP Address", "Port", "Protocol", "State", "Service", "Version", "CPE"])
         nmap_qs = NmapResultDb.objects.filter(organization=org)
-        if project_id and project_id != "all":
+        if project_pk is not None:
             scan_ids = NmapScanDb.objects.filter(
-                organization=org, project_id=project_id
+                organization=org, project_id=project_pk
             ).values_list("scan_id", flat=True)
             nmap_qs = nmap_qs.filter(scan_id__in=scan_ids)
         for r in nmap_qs:
@@ -72,8 +80,8 @@ class ExportCSV(View):
         writer.writerow(["=== STATIC ANALYSIS RESULTS ==="])
         writer.writerow(["Title", "Severity", "File Path", "Scanner", "Status", "Date"])
         static_qs = StaticScanResultsDb.objects.filter(organization=org)
-        if project_id and project_id != "all":
-            static_qs = static_qs.filter(project_id=project_id)
+        if project_pk is not None:
+            static_qs = static_qs.filter(project_id=project_pk)
         for r in static_qs:
             writer.writerow([
                 r.title, r.severity, r.filePath or r.fileName,
@@ -86,6 +94,8 @@ class ExportCSV(View):
         writer.writerow(["=== SSL SCAN RESULTS ==="])
         writer.writerow(["Scan URL", "Status", "Output Summary"])
         ssl_qs = SslscanResultDb.objects.filter(organization=org)
+        if project_pk is not None:
+            ssl_qs = ssl_qs.filter(project_id=project_pk)
         for r in ssl_qs:
             output_preview = (r.sslscan_output or "")[:200].replace("\n", " ")
             writer.writerow([r.scan_url, "Completed" if r.sslscan_output else "Pending", output_preview])
@@ -109,7 +119,15 @@ class ExportExcel(View):
             )
 
         org = _get_org(request)
-        project_id = request.GET.get("project_id")
+        project_uuid = request.GET.get("project_id")
+
+        # Resolve UUID → integer pk
+        project_pk = None
+        if project_uuid and project_uuid != "all":
+            try:
+                project_pk = ProjectDb.objects.get(uu_id=project_uuid, organization=org).pk
+            except ProjectDb.DoesNotExist:
+                project_pk = None
 
         wb = openpyxl.Workbook()
 
@@ -130,9 +148,9 @@ class ExportExcel(View):
         ws1.title = "Nmap Port Scan"
         make_header(ws1, ["IP Address", "Port", "Protocol", "State", "Service", "Version", "CPE"])
         nmap_qs = NmapResultDb.objects.filter(organization=org)
-        if project_id and project_id != "all":
+        if project_pk is not None:
             scan_ids = NmapScanDb.objects.filter(
-                organization=org, project_id=project_id
+                organization=org, project_id=project_pk
             ).values_list("scan_id", flat=True)
             nmap_qs = nmap_qs.filter(scan_id__in=scan_ids)
         for r in nmap_qs:
@@ -142,8 +160,8 @@ class ExportExcel(View):
         ws2 = wb.create_sheet("Static Analysis")
         make_header(ws2, ["Title", "Severity", "File Path", "Scanner", "Status", "Date"])
         static_qs = StaticScanResultsDb.objects.filter(organization=org)
-        if project_id and project_id != "all":
-            static_qs = static_qs.filter(project_id=project_id)
+        if project_pk is not None:
+            static_qs = static_qs.filter(project_id=project_pk)
         for r in static_qs:
             ws2.append([
                 r.title, r.severity, r.filePath or r.fileName,
