@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
 # VAPT Security Platform
 
+import hashlib
 import os
+import re
 import uuid
+from datetime import datetime
 
 from django.conf import settings
 
@@ -50,6 +53,167 @@ def parse_port(proto, ip_addr, host_data, scan_id, project, organization):
         nmap_obj.save()
 
 
+# ─────────────────────────────────────────────────────────────────────────────
+# SEVERITY HELPERS
+# ─────────────────────────────────────────────────────────────────────────────
+
+def _cvss_to_severity(cvss_score):
+    """Map a CVSS score string to Critical/High/Medium/Low."""
+    try:
+        score = float(cvss_score)
+    except (ValueError, TypeError):
+        return "Low"
+    if score >= 9.0:
+        return "Critical"
+    elif score >= 7.0:
+        return "High"
+    elif score >= 4.0:
+        return "Medium"
+    return "Low"
+
+
+def _severity_color(severity):
+    return {
+        "Critical": "critical",
+        "High": "danger",
+        "Medium": "warning",
+        "Low": "info",
+    }.get(severity, "info")
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# DASHBOARD FIX: write CVE records → NetworkScanResultsDb & NetworkScanDb
+# ─────────────────────────────────────────────────────────────────────────────
+
+def _write_network_vuln_records(scan_id, ip_addr, project, organization):
+    """
+    Parse vulners_extrainfo CVE lines, create NetworkScanResultsDb records,
+    then update NetworkScanDb with aggregated severity counts so that the
+    dashboard 'Network Issues' card and pie chart are populated correctly.
+    """
+    from networkscanners.models import NetworkScanDb, NetworkScanResultsDb
+
+    port_results = NmapVulnersPortResultDb.objects.filter(
+        ip_address=ip_addr, scan_id=scan_id
+    )
+
+    total_critical = total_high = total_medium = total_low = 0
+
+    for port_obj in port_results:
+        if not port_obj.vulners_extrainfo:
+            continue
+
+        for line in port_obj.vulners_extrainfo.split("\n"):
+            line = line.strip()
+            if not line:
+                continue
+            parts = [p.strip() for p in line.split("\t") if p.strip()]
+            if len(parts) < 2:
+                continue
+
+            cve_id = parts[0]
+            cvss_raw = parts[1]
+            severity = _cvss_to_severity(cvss_raw)
+            sev_color = _severity_color(severity)
+
+            title = "{} on port {}/{}".format(
+                cve_id, port_obj.port, port_obj.protocol or "tcp"
+            )
+            description = (
+                "CVE {} detected on {} port {}/{} "
+                "(service: {}, version: {}). CVSS Score: {}".format(
+                    cve_id,
+                    ip_addr,
+                    port_obj.port,
+                    port_obj.protocol or "tcp",
+                    port_obj.name or "unknown",
+                    port_obj.version or "unknown",
+                    cvss_raw,
+                )
+            )
+
+            dup_data = str(cve_id) + str(ip_addr) + str(port_obj.port)
+            dup_hash = hashlib.sha256(dup_data.encode("utf-8")).hexdigest()
+
+            # Skip duplicates within this scan
+            if NetworkScanResultsDb.objects.filter(
+                scan_id=scan_id, dup_hash=dup_hash
+            ).exists():
+                continue
+
+            record_kwargs = dict(
+                vuln_id=uuid.uuid4(),
+                scan_id=scan_id,
+                title=title,
+                severity=severity,
+                severity_color=sev_color,
+                description=description,
+                port=str(port_obj.port),
+                ip=ip_addr,
+                scanner="Nmap-Vulners",
+                dup_hash=dup_hash,
+                vuln_duplicate="No",
+                vuln_status="Open",
+                false_positive="No",
+                date_time=datetime.now(),
+            )
+            if project:
+                record_kwargs["project"] = project
+            if organization:
+                record_kwargs["organization"] = organization
+
+            NetworkScanResultsDb(**record_kwargs).save()
+
+            if severity == "Critical":
+                total_critical += 1
+            elif severity == "High":
+                total_high += 1
+            elif severity == "Medium":
+                total_medium += 1
+            else:
+                total_low += 1
+
+    total_vul = total_critical + total_high + total_medium + total_low
+
+    # Update or create the NetworkScanDb row the dashboard reads
+    net_qs = NetworkScanDb.objects.filter(scan_id=scan_id)
+    if net_qs.exists():
+        net_qs.update(
+            total_vul=total_vul,
+            critical_vul=total_critical,
+            high_vul=total_high,
+            medium_vul=total_medium,
+            low_vul=total_low,
+            scan_status="Completed",
+        )
+    else:
+        net_obj = NetworkScanDb(
+            scan_id=scan_id,
+            ip=ip_addr,
+            scan_date=str(datetime.now().date()),
+            scan_status="Completed",
+            total_vul=total_vul,
+            critical_vul=total_critical,
+            high_vul=total_high,
+            medium_vul=total_medium,
+            low_vul=total_low,
+        )
+        if project:
+            net_obj.project = project
+        if organization:
+            net_obj.organization = organization
+        net_obj.save()
+
+    print(
+        "[VAPT] Nmap+Vulners → dashboard: Critical=%d High=%d Medium=%d Low=%d Total=%d"
+        % (total_critical, total_high, total_medium, total_low, total_vul)
+    )
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# MAIN SCAN RUNNER
+# ─────────────────────────────────────────────────────────────────────────────
+
 def run_nmap_vulners(ip_addr="", project=None, organization=None, scan_id=None):
     if not ip_addr:
         raise ValueError("[NMAP_VULNERS] ip_addr must be specified")
@@ -57,7 +221,9 @@ def run_nmap_vulners(ip_addr="", project=None, organization=None, scan_id=None):
     try:
         import nmap
     except ImportError:
-        raise RuntimeError("[NMAP_VULNERS] python-nmap not installed. Run: pip install python-nmap")
+        raise RuntimeError(
+            "[NMAP_VULNERS] python-nmap not installed. Run: pip install python-nmap"
+        )
 
     if scan_id is None:
         scan_id = uuid.uuid4()
@@ -66,7 +232,7 @@ def run_nmap_vulners(ip_addr="", project=None, organization=None, scan_id=None):
         settings.BASE_DIR, "tools/nmap_vulners/vulners.nse"
     )
 
-    # Build nmap arguments from settings (with safe defaults if no settings row exists)
+    # Build nmap arguments from settings (with safe defaults)
     nv_version = True   # -sV default
     nv_online = True    # -Pn default
     nv_timing = 4       # -T4 default
@@ -98,7 +264,7 @@ def run_nmap_vulners(ip_addr="", project=None, organization=None, scan_id=None):
         print("[VAPT] Nmap+Vulners: no hosts found in scan result for", ip_addr)
         return
 
-    # Clear old results for this IP before saving new ones
+    # Clear old port results for this IP before saving fresh ones
     NmapVulnersPortResultDb.objects.filter(ip_address=ip_addr).delete()
 
     for host, host_data in scan.items():
@@ -106,20 +272,16 @@ def run_nmap_vulners(ip_addr="", project=None, organization=None, scan_id=None):
         parse_port("tcp", host, host_data, scan_id, project, organization)
         parse_port("udp", host, host_data, scan_id, project, organization)
 
-        # Count ports
+        # Count open/closed ports
         all_data = NmapVulnersPortResultDb.objects.filter(ip_address=host)
         total_ports = all_data.count()
-        total_open_p = NmapVulnersPortResultDb.objects.filter(
-            ip_address=host, state="open"
-        ).count()
-        total_close_p = NmapVulnersPortResultDb.objects.filter(
-            ip_address=host, state="closed"
-        ).count()
+        total_open_p = all_data.filter(state="open").count()
+        total_close_p = all_data.filter(state="closed").count()
 
         print("[VAPT] Nmap+Vulners: %s — %d open / %d closed ports" % (
             host, total_open_p, total_close_p))
 
-        # Update the existing placeholder record (created before scan started)
+        # Update the placeholder NmapScanDb record
         updated = NmapScanDb.objects.filter(scan_id=scan_id).update(
             scan_ip=host,
             project=project,
@@ -127,7 +289,6 @@ def run_nmap_vulners(ip_addr="", project=None, organization=None, scan_id=None):
             total_open_ports=total_open_p,
             total_close_ports=total_close_p,
         )
-        # If no placeholder existed (e.g. called directly), create it
         if not updated:
             NmapScanDb(
                 scan_id=scan_id,
@@ -139,3 +300,11 @@ def run_nmap_vulners(ip_addr="", project=None, organization=None, scan_id=None):
                 organization=organization,
                 is_vulners=True,
             ).save()
+
+        # ── Write CVE records to NetworkScanResultsDb and update NetworkScanDb ──
+        _write_network_vuln_records(
+            scan_id=scan_id,
+            ip_addr=host,
+            project=project,
+            organization=organization,
+        )
