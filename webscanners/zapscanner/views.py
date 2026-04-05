@@ -467,7 +467,6 @@ class ZapSettingUpdate(APIView):
 
         zap_enabled = False
         random_port = "8091"
-        target_url = "https://archerysec.com"
         zap_info = ""
 
         all_zap = ZapSettingsDb.objects.filter()
@@ -485,30 +484,33 @@ class ZapSettingUpdate(APIView):
                     request, "setting/settings_page.html", {"zap_info": zap_info}
                 )
 
-            for i in range(0, 100):
-                while True:
-                    try:
-                        # Connection Test
-                        zap_connect = zap_plugin.zap_connect(random_port)
-                        zap_connect.spider.scan(url=target_url)
-                    except Exception as e:
-                        print("ZAP Connection Not Found, re-try after 5 sec")
-                        time.sleep(5)
-                        continue
+            connected = False
+            for i in range(0, 20):
+                try:
+                    zap_connect = zap_plugin.zap_connect(random_port)
+                    version = zap_connect.core.version()
+                    print("[VAPT] ZAP local connection OK — version:", version)
+                    connected = True
                     break
+                except Exception as e:
+                    print("[VAPT] ZAP not ready yet, retrying in 5s... (%s)" % e)
+                    time.sleep(5)
+
+            if not connected:
+                print("[VAPT] ZAP local instance did not become ready.")
         else:
             try:
-                zap_connect = zap_plugin.zap_connect(
-                    random_port,
-                )
-                zap_connect.spider.scan(url=target_url)
+                zap_connect = zap_plugin.zap_connect(random_port)
+                version = zap_connect.core.version()
+                print("[VAPT] ZAP remote connection OK — version:", version)
                 zap_info = True
                 SettingsDb.objects.filter(setting_id=setting_id).update(
                     setting_status=zap_info
                 )
                 if request.path[:4] == "/api":
                     return Response({"message": "OWASP ZAP scanner updated!!!"})
-            except:
+            except Exception as e:
+                print("[VAPT] ZAP remote connection failed:", e)
                 zap_info = False
                 SettingsDb.objects.filter(setting_id=setting_id).update(
                     setting_status=zap_info
