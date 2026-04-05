@@ -44,6 +44,14 @@ def nmap_vulners(request):
             notify.send(user, recipient=user, verb="Nmap+Vulners: IP address is required")
             return HttpResponseRedirect("/tools/nmap_vulners_scan/")
 
+        # Remove stale incomplete records for this IP before starting fresh
+        NmapScanDb.objects.filter(
+            scan_ip=ip_address,
+            is_vulners=True,
+            total_ports__isnull=True,
+            organization=organization,
+        ).delete()
+
         # Create placeholder record BEFORE thread starts so user sees scan immediately
         scan_id = uuid.uuid4()
         NmapScanDb.objects.create(
@@ -89,8 +97,8 @@ def _run_nmap_vulners_background(scan_id, ip_address, project, organization, use
         print("[VAPT] Nmap+Vulners scan completed for", ip_address)
     except Exception as e:
         print("[VAPT] Nmap+Vulners error:", e)
-        # Mark the placeholder as failed
-        NmapScanDb.objects.filter(scan_id=scan_id).update(total_ports='0')
+        # Mark the placeholder as failed so template shows 'Failed' not 'Scanning'
+        NmapScanDb.objects.filter(scan_id=scan_id).update(total_ports='Error')
         notify.send(user, recipient=user, verb="Nmap+Vulners scan failed: %s — %s" % (ip_address, str(e)))
 
 
